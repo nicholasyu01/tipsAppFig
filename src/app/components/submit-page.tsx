@@ -1,0 +1,526 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { ArrowLeft, CheckCircle2, Info } from "lucide-react";
+import { Button } from "@/app/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/app/components/ui/card";
+import { Input } from "@/app/components/ui/input";
+import { Label } from "@/app/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
+import { Alert, AlertDescription } from "@/app/components/ui/alert";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/app/components/ui/tabs";
+import {
+  mockRestaurants,
+  roleLabels,
+  type Role,
+  type ShiftType,
+} from "@/data/mockData";
+
+interface SubmitPageProps {
+  onBack: () => void;
+}
+
+interface ShiftFormData {
+  restaurantId: string;
+  role: Role;
+  shiftTimeOfDay?: string;
+  shiftStartTime?: string;
+  shiftType: ShiftType;
+  date: string;
+  baseWage: number;
+  totalSales: number;
+  grossTips: number;
+  tipOutAmount: number;
+  hoursWorked: number;
+}
+
+export function SubmitPage({ onBack }: SubmitPageProps) {
+  const [currentStep, setCurrentStep] = useState<
+    "basic" | "earnings" | "review" | "success"
+  >("basic");
+  const [formData, setFormData] = useState<Partial<ShiftFormData>>({});
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ShiftFormData>();
+
+  const grossTips = watch("grossTips") || formData.grossTips || 0;
+  const tipOutAmount = watch("tipOutAmount") || formData.tipOutAmount || 0;
+  const totalSales = watch("totalSales") || formData.totalSales || 0;
+  const hoursWorked = watch("hoursWorked") || formData.hoursWorked || 0;
+  const baseWage = watch("baseWage") || formData.baseWage || 0;
+
+  const netTips = grossTips - tipOutAmount;
+  const effectiveHourly =
+    hoursWorked > 0 ? netTips / hoursWorked + baseWage : 0;
+  const tipPercentage = totalSales > 0 ? (grossTips / totalSales) * 100 : 0;
+
+  const handleBasicInfo = (data: Partial<ShiftFormData>) => {
+    setFormData({ ...formData, ...data });
+    setCurrentStep("earnings");
+  };
+
+  const handleEarningsInfo = (data: Partial<ShiftFormData>) => {
+    setFormData({ ...formData, ...data });
+    setCurrentStep("review");
+  };
+
+  const handleFinalSubmit = () => {
+    // In a real app, this would send to backend
+    console.log("Submitting shift data:", formData);
+    setCurrentStep("success");
+  };
+
+  if (currentStep === "success") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 className="size-8 text-green-600" />
+            </div>
+            <CardTitle className="text-2xl">Submission Successful!</CardTitle>
+            <CardDescription>
+              Thank you for contributing to tip transparency. Your data helps
+              thousands of workers make informed decisions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-green-50 rounded-lg">
+              <p className="text-sm font-medium mb-2">Your contribution:</p>
+              <p className="text-2xl font-bold text-green-700">
+                ${netTips.toFixed(0)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Net tips for this shift
+              </p>
+            </div>
+
+            <Alert>
+              <Info className="size-4" />
+              <AlertDescription>
+                Your submission is completely anonymous and will be aggregated
+                with others to provide accurate earnings insights.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex gap-2">
+              <Button onClick={onBack} className="flex-1">
+                Browse Data
+              </Button>
+              <Button
+                onClick={() => {
+                  setFormData({});
+                  setCurrentStep("basic");
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Submit Another
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-6">
+          <Button onClick={onBack} variant="ghost" className="mb-4">
+            <ArrowLeft className="size-4 mr-2" />
+            Back
+          </Button>
+          <h1 className="text-3xl font-bold mb-2">Cashout</h1>
+          {/* <p className="text-muted-foreground">
+            Help other workers by sharing your shift earnings. All submissions are anonymous.
+          </p> */}
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Step 1: Basic Info */}
+        {currentStep === "basic" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Save Shift Information</CardTitle>
+              {/* <CardDescription>
+                Tell us about the shift you worked
+              </CardDescription> */}
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleBasicInfo} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="grossTips">Tips ($) *</Label>
+                  <Input
+                    id="grossTips"
+                    type="number"
+                    step="0.01"
+                    placeholder="270.00"
+                    defaultValue={formData.grossTips}
+                    {...register("grossTips", { required: true, min: 0 })}
+                  />
+                  {/* <p className="text-xs text-muted-foreground">
+                      Total tips before tip-out
+                    </p> */}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="restaurant">Restaurant *</Label>
+                  <Select
+                    defaultValue={formData.restaurantId}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, restaurantId: value })
+                    }
+                  >
+                    <SelectTrigger id="restaurant">
+                      <SelectValue placeholder="Select restaurant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockRestaurants.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.name} - {r.city}, {r.state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select
+                    defaultValue={formData.role}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, role: value as Role })
+                    }
+                  >
+                    <SelectTrigger id="role">
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(roleLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="shiftStartTime">Start Time *</Label>
+                    <Input
+                      id="shiftStartTime"
+                      type="time"
+                      defaultValue={formData.shiftStartTime}
+                      step={900}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          shiftStartTime: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  {/* <div className="space-y-2">
+                    <Label htmlFor="shiftType">Shift Type *</Label>
+                    <Select
+                      defaultValue={formData.shiftType}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          shiftType: value as ShiftType,
+                        })
+                      }
+                    >
+                      <SelectTrigger id="shiftType">
+                        <SelectValue placeholder="Select shift type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">
+                          Standard Service
+                        </SelectItem>
+                        <SelectItem value="private_party">
+                          Private Party/Buyout
+                        </SelectItem>
+                        <SelectItem value="club_bar">
+                          Club Bar Service
+                        </SelectItem>
+                        <SelectItem value="bottle_service">
+                          Bottle Service
+                        </SelectItem>
+                        <SelectItem value="event">Event/Catering</SelectItem>
+                        <SelectItem value="holiday">Holiday</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    </div> */}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="date">Date *</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      defaultValue={formData.date}
+                      {...register("date", { required: true })}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* <div className="space-y-2">
+                    <Label htmlFor="baseWage">Base Hourly Wage ($) *</Label>
+                    <Input
+                      id="baseWage"
+                      type="number"
+                      step="0.01"
+                      placeholder="10.50"
+                      defaultValue={formData.baseWage}
+                      {...register("baseWage", { required: true, min: 0 })}
+                    />
+                  </div> */}
+
+                  {/* <div className="space-y-2">
+                    <Label htmlFor="hoursWorked">Hours Worked *</Label>
+                    <Input
+                      id="hoursWorked"
+                      type="number"
+                      step="0.5"
+                      placeholder="6.5"
+                      defaultValue={formData.hoursWorked}
+                      {...register("hoursWorked", { required: true, min: 0 })}
+                    />
+                  </div> */}
+                </div>
+                {/* 
+                <div className="space-y-2">
+                  <Label htmlFor="totalSales">
+                    Total Sales You Handled ($) *
+                  </Label>
+                  <Input
+                    id="totalSales"
+                    type="number"
+                    step="0.01"
+                    placeholder="1500.00"
+                    defaultValue={formData.totalSales}
+                    {...register("totalSales", { required: true, min: 0 })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your total sales for the shift (found on your checkout
+                    report)
+                  </p>
+                </div> */}
+                {/* 
+                <div className="space-y-2">
+                  <Label htmlFor="tipOutAmount">Tip Out Amount ($)</Label>
+                  <Input
+                    id="tipOutAmount"
+                    type="number"
+                    step="0.01"
+                    placeholder="15.00"
+                    defaultValue={formData.tipOutAmount || 0}
+                    {...register("tipOutAmount", { min: 0 })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Total amount tipped out to support staff (leave 0 if none)
+                  </p>
+                </div> */}
+
+                {/* Live Calculations */}
+                {grossTips > 0 && hoursWorked > 0 && (
+                  <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+                    <h4 className="font-medium">Calculated Values:</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Net Tips</p>
+                        <p className="text-lg font-semibold text-green-600">
+                          ${netTips.toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">
+                          Effective Hourly
+                        </p>
+                        <p className="text-lg font-semibold text-green-600">
+                          ${effectiveHourly.toFixed(2)}/hr
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Tip %</p>
+                        <p className="text-lg font-semibold">
+                          {tipPercentage.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Tip Out %</p>
+                        <p className="text-lg font-semibold">
+                          {grossTips > 0
+                            ? ((tipOutAmount / grossTips) * 100).toFixed(1)
+                            : 0}
+                          %
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    !formData.restaurantId ||
+                    !formData.role ||
+                    !formData.shiftStartTime ||
+                    !formData.shiftType
+                  }
+                >
+                  Save
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 3: Review */}
+        {/* {currentStep === "basic" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Review Your Submission</CardTitle>
+              <CardDescription>
+                Please verify all information is correct before submitting
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Restaurant</p>
+                    <p className="font-medium">
+                      {
+                        mockRestaurants.find(
+                          (r) => r.id === formData.restaurantId,
+                        )?.name
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Role</p>
+                    <p className="font-medium">
+                      {formData.role && roleLabels[formData.role]}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Shift</p>
+                    <p className="font-medium">
+                      {formData.shiftTimeOfDay &&
+                        shiftTimeLabels[formData.shiftTimeOfDay]}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="font-medium">{formData.date}</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-semibold mb-3">Earnings Summary</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Base Wage</span>
+                      <span className="font-medium">
+                        ${formData.baseWage}/hr
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Hours Worked
+                      </span>
+                      <span className="font-medium">
+                        {formData.hoursWorked}h
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Sales</span>
+                      <span className="font-medium">
+                        ${formData.totalSales}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Gross Tips</span>
+                      <span className="font-medium">${formData.grossTips}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tip Out</span>
+                      <span className="font-medium">
+                        -${formData.tipOutAmount || 0}
+                      </span>
+                    </div>
+                    <div className="border-t pt-2 flex justify-between">
+                      <span className="font-semibold">Net Tips</span>
+                      <span className="font-bold text-green-700">
+                        ${netTips.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold">
+                        Effective Hourly Rate
+                      </span>
+                      <span className="font-bold text-green-700">
+                        ${effectiveHourly.toFixed(2)}/hr
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Alert>
+                <Info className="size-4" />
+                <AlertDescription>
+                  Your submission is <strong>completely anonymous</strong>. We
+                  never store identifying information and your data will be
+                  aggregated with others to provide insights.
+                </AlertDescription>
+              </Alert>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCurrentStep("earnings")}
+                  className="flex-1"
+                >
+                  Back
+                </Button>
+                <Button onClick={handleFinalSubmit} className="flex-1">
+                  Submit Earnings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )} */}
+      </div>
+    </div>
+  );
+}
