@@ -433,7 +433,9 @@ export function RestaurantDetailPage({
                             key={stat.id}
                             className="border-b hover:bg-gray-50"
                           >
-                            <td className="py-3 px-2">{stat.role}</td>
+                            <td className="py-3 px-2 capitalize">
+                              {stat.role}
+                            </td>
                             <td className="py-3 px-2">
                               {new Date(stat.date).toLocaleDateString()}
                             </td>

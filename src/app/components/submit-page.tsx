@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+// using local controlled form state for submission
 import { ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import {
@@ -30,7 +30,9 @@ import {
   roleLabels,
   type Role,
   type ShiftType,
+  type Restaurant,
 } from "@/data/mockData";
+import { supabase } from "../lib/supabaseClient";
 
 interface SubmitPageProps {
   onBack: () => void;
@@ -55,19 +57,25 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     "basic" | "earnings" | "review" | "success"
   >("basic");
   const [formData, setFormData] = useState<Partial<ShiftFormData>>({});
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submittedTips, setSubmittedTips] = useState(0);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<ShiftFormData>();
+  const [form, setForm] = useState({
+    name: "",
+    restaurant: "",
+    tipAmount: "",
+    role: "Server",
+    date: "",
+    shiftStartTime: "",
+    tipStructure: "individual",
+  });
 
-  const grossTips = watch("grossTips") || formData.grossTips || 0;
-  const tipOutAmount = watch("tipOutAmount") || formData.tipOutAmount || 0;
-  const totalSales = watch("totalSales") || formData.totalSales || 0;
-  const hoursWorked = watch("hoursWorked") || formData.hoursWorked || 0;
-  const baseWage = watch("baseWage") || formData.baseWage || 0;
+  const grossTips = Number(form.tipAmount) || Number(formData.grossTips) || 0;
+  const tipOutAmount = Number(formData.tipOutAmount) || 0;
+  const totalSales = Number(formData.totalSales) || 0;
+  const hoursWorked = Number(formData.hoursWorked) || 0;
+  const baseWage = Number(formData.baseWage) || 0;
 
   const netTips = grossTips - tipOutAmount;
   const effectiveHourly =
@@ -79,6 +87,85 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     setCurrentStep("earnings");
   };
 
+  function validate() {
+    // if (!form.name.trim()) return "Name is required";
+    if (!form.restaurant.trim()) return "Restaurant is required";
+    if (!form.tipAmount || Number.isNaN(Number(form.tipAmount)))
+      return "Valid tip amount is required";
+    if (!form.role) return "Role is required";
+    if (!form.date) return "Date is required";
+    if (!form.shiftStartTime) return "Shift start time is required";
+    return null;
+  }
+
+  async function submitTip(payload: any) {
+    // Insert into Supabase `tips` table. Ensure your table has matching columns.
+    const { data, error } = await supabase.from("tips").insert([payload]);
+    if (error) {
+      console.error("Supabase insert error:", error);
+      throw error;
+    }
+    // refresh tips list after successful insert
+    // await loadTips();
+    return data;
+  }
+  function update(field: any) {
+    return (e: any) => setForm((s) => ({ ...s, [field]: e.target.value }));
+  }
+  const submitCashout = async (e: any) => {
+    e.preventDefault();
+    const err = validate();
+    if (err) {
+      setMessage(err);
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage("");
+
+    const restaurantName =
+      mockRestaurants.find((r: Restaurant) => r.id === form.restaurant)?.name ??
+      form.restaurant;
+
+    const payload = {
+      name: (form.name ?? "NoName").trim(), // todo use user model
+      restaurant: (restaurantName ?? "").trim(),
+      tipAmount: Number(form.tipAmount),
+      role: form.role,
+      date: form.date,
+      shiftStartTime: form.shiftStartTime,
+      tipStructure: form.tipStructure,
+      createdAt: new Date().toISOString(),
+    };
+    console.log("Submitting tip payload:", payload);
+
+    try {
+      // If a parent passed an onSubmit handler, call it (e.g., to persist to server)
+      if (submitTip) {
+        await submitTip(payload);
+      } else {
+        // Default local behavior: log to console. Replace with API call as needed.
+        console.log("Tip submitted:", payload);
+      }
+      setSubmittedTips(Number(form.tipAmount));
+      setMessage("Tip submitted successfully.");
+      setForm({
+        name: "",
+        restaurant: "",
+        tipAmount: "",
+        role: "Server",
+        date: "",
+        shiftStartTime: "",
+        tipStructure: "individual",
+      });
+      setCurrentStep("success");
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to submit tip. See console for details.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const handleEarningsInfo = (data: Partial<ShiftFormData>) => {
     setFormData({ ...formData, ...data });
     setCurrentStep("review");
@@ -98,34 +185,34 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle2 className="size-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl">Submission Successful!</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl">Cashout Successful!</CardTitle>
+            {/* <CardDescription>
               Thank you for contributing to tip transparency. Your data helps
               thousands of workers make informed decisions.
-            </CardDescription>
+            </CardDescription> */}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm font-medium mb-2">Your contribution:</p>
+              <p className="text-sm font-medium mb-2">Your earnings:</p>
               <p className="text-2xl font-bold text-green-700">
-                ${netTips.toFixed(0)}
+                ${submittedTips.toFixed(0)}
               </p>
               <p className="text-sm text-muted-foreground">
                 Net tips for this shift
               </p>
             </div>
 
-            <Alert>
+            {/* <Alert>
               <Info className="size-4" />
               <AlertDescription>
                 Your submission is completely anonymous and will be aggregated
                 with others to provide accurate earnings insights.
               </AlertDescription>
-            </Alert>
+            </Alert> */}
 
             <div className="flex gap-2">
               <Button onClick={onBack} className="flex-1">
-                Browse Data
+                Done
               </Button>
               <Button
                 onClick={() => {
@@ -170,16 +257,16 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
               </CardDescription> */}
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleBasicInfo} className="space-y-6">
+              <form className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="grossTips">Tips ($) *</Label>
+                  <Label htmlFor="tipAmount">Tips ($) *</Label>
                   <Input
-                    id="grossTips"
+                    id="tipAmount"
                     type="number"
                     step="0.01"
                     placeholder="00.00"
-                    defaultValue={formData.grossTips}
-                    {...register("grossTips", { required: true, min: 0 })}
+                    value={form.tipAmount}
+                    onChange={update("tipAmount")}
                   />
                   {/* <p className="text-xs text-muted-foreground">
                       Total tips before tip-out
@@ -187,21 +274,49 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="restaurant">Restaurant *</Label>
-                  <Select
-                    defaultValue={formData.restaurantId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, restaurantId: value })
+                  {/* <Select
+                    defaultValue={form.restaurant}
+                    onValueChange={(value: string) =>
+                      setForm((s) => ({ ...s, restaurant: value }))
                     }
                   >
                     <SelectTrigger id="restaurant">
                       <SelectValue placeholder="Select restaurant" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockRestaurants.map((r) => (
+                      {mockRestaurants.map((r: Restaurant) => (
                         <SelectItem key={r.id} value={r.id}>
                           {r.name} - {r.city}, {r.state}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select> */}
+                  <Input
+                    id="restaurantId"
+                    placeholder="Enter restaurant name"
+                    value={form.restaurant}
+                    onChange={update("restaurant")}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tipStructure">Tip Model *</Label>
+                  <Select
+                    defaultValue={form.tipStructure}
+                    onValueChange={(value: string) =>
+                      setForm((s) => ({ ...s, tipStructure: value }))
+                    }
+                  >
+                    <SelectTrigger id="tipStructure">
+                      <SelectValue placeholder="Select Tip Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem key={1} value={"individual"}>
+                        Individual
+                      </SelectItem>
+                      <SelectItem key={2} value={"pool"}>
+                        Tip Pool
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -209,9 +324,9 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                 <div className="space-y-2">
                   <Label htmlFor="role">Role *</Label>
                   <Select
-                    defaultValue={formData.role}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, role: value as Role })
+                    defaultValue={form.role}
+                    onValueChange={(value: string) =>
+                      setForm((s) => ({ ...s, role: value as Role }))
                     }
                   >
                     <SelectTrigger id="role">
@@ -229,18 +344,23 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="date">Date *</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={form.date}
+                      onChange={update("date")}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="shiftStartTime">Start Time *</Label>
                     <Input
                       id="shiftStartTime"
                       type="time"
-                      defaultValue={formData.shiftStartTime}
                       step={900}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          shiftStartTime: e.target.value,
-                        })
-                      }
+                      value={form.shiftStartTime}
+                      onChange={update("shiftStartTime")}
                     />
                   </div>
 
@@ -276,17 +396,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       </SelectContent>
                     </Select>
                     </div> */}
-
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date *</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      defaultValue={formData.date}
-                      {...register("date", { required: true })}
-                      max={new Date().toISOString().split("T")[0]}
-                    />
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -349,7 +458,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                 </div> */}
 
                 {/* Live Calculations */}
-                {grossTips > 0 && hoursWorked > 0 && (
+                {/* {grossTips > 0 && hoursWorked > 0 && (
                   <div className="p-4 bg-gray-50 rounded-lg space-y-3">
                     <h4 className="font-medium">Calculated Values:</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
@@ -384,16 +493,18 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       </div>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 <Button
                   type="submit"
                   className="w-full"
+                  onClick={submitCashout}
                   disabled={
-                    !formData.restaurantId ||
-                    !formData.role ||
-                    !formData.shiftStartTime ||
-                    !formData.shiftType
+                    !form.tipAmount ||
+                    !form.restaurant ||
+                    !form.role ||
+                    !form.date ||
+                    !form.shiftStartTime
                   }
                 >
                   Save
