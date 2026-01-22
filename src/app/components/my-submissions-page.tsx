@@ -40,6 +40,7 @@ import {
   roleLabels,
   shiftTimeLabels,
   type ShiftSubmission,
+  type Restaurant,
 } from "@/data/mockData";
 import {
   BarChart,
@@ -50,8 +51,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { supabase } from "../lib/supabaseClient";
 
 interface MySubmissionsPageProps {
+  userEmail?: string | null;
   onBack: () => void;
   submissions: ShiftSubmission[];
   onDeleteSubmission: (id: string) => void;
@@ -60,6 +63,7 @@ interface MySubmissionsPageProps {
 type SortOption = "date-desc" | "date-asc" | "earnings-desc" | "earnings-asc";
 
 export function MySubmissionsPage({
+  userEmail,
   onBack,
   submissions,
   onDeleteSubmission,
@@ -71,19 +75,24 @@ export function MySubmissionsPage({
   const [submissionToDelete, setSubmissionToDelete] = useState<string | null>(
     null,
   );
+  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [totalEarnings, setTotalEarnings] = useState<number>(0);
+  const [totalHours, setTotalHours] = useState<number>(0);
+  const [avgHourly, setAvgHourly] = useState<number>(0);
+  const [avgTipsPerShift, setAvgTipsPerShift] = useState<number>(1);
 
   // Get unique roles and shifts from submissions
-  const uniqueRoles = Array.from(new Set(submissions.map((s) => s.role)));
+  const uniqueRoles = Array.from(new Set(restaurants.map((s) => s.role)));
   const uniqueShifts = Array.from(
     new Set(submissions.map((s) => s.shiftTimeOfDay)),
   );
 
   // Filter and sort submissions
-  const filteredSubmissions = submissions
+  const filteredSubmissions = restaurants
     .filter((sub) => {
       if (filterRole !== "all" && sub.role !== filterRole) return false;
-      if (filterShift !== "all" && sub.shiftTimeOfDay !== filterShift)
-        return false;
+
       return true;
     })
     .sort((a, b) => {
@@ -93,20 +102,20 @@ export function MySubmissionsPage({
         case "date-asc":
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         case "earnings-desc":
-          return b.netTips - a.netTips;
+          return b.tipAmount - a.tipAmount;
         case "earnings-asc":
-          return a.netTips - b.netTips;
+          return a.tipAmount - b.tipAmount;
         default:
           return 0;
       }
     });
 
   // Calculate summary stats
-  const totalEarnings = submissions.reduce((sum, s) => sum + s.netTips, 0);
-  const totalHours = submissions.reduce((sum, s) => sum + s.hoursWorked, 0);
-  const avgHourly = totalHours > 0 ? totalEarnings / totalHours : 0;
-  const avgTipsPerShift =
-    submissions.length > 0 ? totalEarnings / submissions.length : 0;
+  // const totalEarnings = submissions.reduce((sum, s) => sum + s.netTips, 0);
+  // const totalHours = submissions.reduce((sum, s) => sum + s.hoursWorked, 0);
+  // const avgHourly = totalHours > 0 ? totalEarnings / totalHours : 0;
+  // const avgTipsPerShift =
+  //   submissions.length > 0 ? totalEarnings / submissions.length : 0;
 
   // Prepare chart data - earnings over time
   const chartData = submissions
@@ -146,6 +155,70 @@ export function MySubmissionsPage({
     }
   };
 
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      setLoadingRestaurants(true);
+      try {
+        const { data, error } = await supabase
+          .from("tips")
+          .select(
+            `createdAt, date, id, name, restaurant, role, shiftStartTime, tipAmount, tipStructure`,
+          );
+
+        if (error) {
+          console.error("Error fetching restaurants:", error);
+          setRestaurants([]);
+          return;
+        }
+
+        const rows = (data ?? []) as any[];
+        const map = new Map<string, Restaurant>();
+
+        rows.forEach((r) => {
+          const id = r.id;
+          if (!id) return;
+
+          if (!map.has(String(id))) {
+            map.set(String(id), {
+              id: String(id),
+              name: r.restaurant,
+              city: r.city ?? "Vancouver",
+              state: r.state ?? "BC",
+              cuisine: r.cuisine ?? "",
+              priceRange: (r.price_range ?? r.priceRange ?? "$") as any,
+              serviceStyle: (r.service_style ??
+                r.serviceStyle ??
+                "casual") as any,
+              tipModel: (r.tipStructure ??
+                r.tipStructure ??
+                "individual") as any,
+              poolDistribution: "",
+              creditCardFeeDeduction: Boolean(false),
+            });
+          }
+        });
+
+        console.log("data", data);
+        const myData = data.filter((r) => r.name === userEmail);
+        setRestaurants(myData);
+
+        const totalEarnings = myData.reduce((sum, s) => sum + s.tipAmount, 0);
+        setTotalEarnings(totalEarnings);
+
+        const avgTipsPerShift =
+          myData.length > 0 ? totalEarnings / myData.length : 0;
+        setAvgTipsPerShift(avgTipsPerShift);
+      } catch (err) {
+        console.error(err);
+        setRestaurants([]);
+      } finally {
+        setLoadingRestaurants(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -164,7 +237,7 @@ export function MySubmissionsPage({
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {submissions.length === 0 ? (
+        {restaurants.length === 0 && !loadingRestaurants ? (
           <Card>
             <CardContent className="py-12 text-center">
               <DollarSign className="size-12 mx-auto text-muted-foreground mb-4" />
@@ -186,9 +259,7 @@ export function MySubmissionsPage({
                     <DollarSign className="size-4" />
                     Earnings
                   </CardDescription>
-                  <CardTitle className="text-2xl">
-                    ${totalEarnings.toLocaleString()}
-                  </CardTitle>
+                  <CardTitle className="text-2xl">${totalEarnings}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -203,9 +274,7 @@ export function MySubmissionsPage({
                     <TrendingUp className="size-4" />
                     Avg per Shift
                   </CardDescription>
-                  <CardTitle className="text-2xl">
-                    ${Math.round(avgTipsPerShift)}
-                  </CardTitle>
+                  <CardTitle className="text-2xl">${avgTipsPerShift}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -238,7 +307,7 @@ export function MySubmissionsPage({
                     Total Shifts
                   </CardDescription>
                   <CardTitle className="text-2xl">
-                    {submissions.length}
+                    {restaurants.length}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -304,7 +373,7 @@ export function MySubmissionsPage({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>
-                      All Submissions ({filteredSubmissions.length})
+                      All Submissions ({restaurants.length})
                     </CardTitle>
                     <CardDescription>
                       View and manage your shift earnings
@@ -332,7 +401,7 @@ export function MySubmissionsPage({
                     </Select>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <label className="text-sm font-medium">Shift:</label>
                     <Select value={filterShift} onValueChange={setFilterShift}>
                       <SelectTrigger className="w-[150px]">
@@ -347,7 +416,7 @@ export function MySubmissionsPage({
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> */}
 
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium">Sort:</label>
@@ -375,9 +444,7 @@ export function MySubmissionsPage({
                 {/* Submissions List */}
                 <div className="space-y-4">
                   {filteredSubmissions.map((submission) => {
-                    const restaurant = getRestaurantById(
-                      submission.restaurantId,
-                    );
+                    const restaurant = getRestaurantById(submission.restaurant);
 
                     return (
                       <Card
@@ -388,20 +455,47 @@ export function MySubmissionsPage({
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-2">
-                                <h3 className="font-semibold text-lg">
-                                  {restaurant?.name}
+                                <h3 className="font-semibold text-lg capitalize">
+                                  {submission?.restaurant}
                                 </h3>
-                                <Badge variant="secondary">
-                                  {roleLabels[submission.role]}
-                                </Badge>
+                                {/* <Badge variant="secondary capitalize">
+                                  {submission.role}
+                                </Badge> */}
                                 <Badge variant="outline">
-                                  {shiftTimeLabels[submission.shiftTimeOfDay]}
+                                  {(() => {
+                                    const t = submission.shiftStartTime;
+                                    if (!t) return null;
+
+                                    // Try parsing as full date/time first
+                                    const dt = new Date(t);
+                                    if (!isNaN(dt.getTime())) {
+                                      return dt.toLocaleTimeString("en-US", {
+                                        hour: "numeric",
+                                        minute: "2-digit",
+                                      });
+                                    }
+
+                                    // Fallback for plain "HH:mm" or "H:mm"
+                                    const m =
+                                      String(t).match(/^(\d{1,2}):(\d{2})$/);
+                                    if (m) {
+                                      let hh = parseInt(m[1], 10);
+                                      const mm = m[2];
+                                      const ampm = hh >= 12 ? "PM" : "AM";
+                                      hh = ((hh + 11) % 12) + 1; // convert 0-23 -> 12-hour (1-12)
+                                      return `${hh}:${mm} ${ampm}`;
+                                    }
+
+                                    return t;
+                                  })()}
                                 </Badge>
                               </div>
 
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                                 <div>
-                                  <p className="text-xs text-muted-foreground"></p>
+                                  <p className="text-L text-muted-foreground capitlaize">
+                                    {submission.role}
+                                  </p>
                                   <p className="font-medium">
                                     {new Date(
                                       submission.date,
@@ -414,15 +508,21 @@ export function MySubmissionsPage({
                                   <p className="text-xs text-muted-foreground">
                                     {submission.dayOfWeek}
                                   </p>
-                                </div>
-
-                                <div>
                                   <p className="text-xs text-muted-foreground">
                                     Net Tips
                                   </p>
                                   <p className="font-semibold text-green-600 text-lg">
-                                    ${submission.netTips}
+                                    ${submission.tipAmount}
                                   </p>
+                                </div>
+
+                                <div>
+                                  {/* <p className="text-xs text-muted-foreground">
+                                    Net Tips
+                                  </p>
+                                  <p className="font-semibold text-green-600 text-lg">
+                                    ${submission.tipAmount}
+                                  </p> */}
                                 </div>
                                 {/* 
                                 <div>
@@ -469,14 +569,14 @@ export function MySubmissionsPage({
                             </div>
 
                             <div className="flex gap-2 ml-4">
-                              <Button
+                              {/* <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteClick(submission.id)}
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="size-4" />
-                              </Button>
+                              </Button> */}
                             </div>
                           </div>
                         </CardContent>

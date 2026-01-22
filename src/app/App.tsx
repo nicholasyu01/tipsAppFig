@@ -132,13 +132,19 @@ export default function App() {
             />
           )}
 
-          {currentView === "submit" && <SubmitPage onBack={handleBackToHome} />}
+          {currentView === "submit" && (
+            <SubmitPage
+              userEmail={session?.user.email}
+              onBack={handleBackToHome}
+            />
+          )}
 
           {currentView === "compare" && (
             <ComparePage onBack={handleBackToHome} />
           )}
           {currentView === "my-submissions" && (
             <MySubmissionsPage
+              userEmail={session?.user.email}
               onBack={handleBackToHome}
               submissions={userSubmissions}
               onDeleteSubmission={handleDeleteSubmission}

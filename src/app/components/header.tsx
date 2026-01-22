@@ -101,11 +101,11 @@ export function Header({
           </nav>
 
           <div className="flex items-center gap-3">
-            {isAuthenticated && userEmail && (
+            {/* {isAuthenticated && userEmail && (
               <Badge variant="outline" className="hidden sm:inline-flex">
                 {userEmail}
               </Badge>
-            )}
+            )} */}
 
             {isAuthenticated ? (
               <Button
