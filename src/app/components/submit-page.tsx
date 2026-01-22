@@ -35,6 +35,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 
 interface SubmitPageProps {
+  userEmail?: string | null;
   onBack: () => void;
 }
 
@@ -52,7 +53,7 @@ interface ShiftFormData {
   hoursWorked: number;
 }
 
-export function SubmitPage({ onBack }: SubmitPageProps) {
+export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
   const [currentStep, setCurrentStep] = useState<
     "basic" | "earnings" | "review" | "success"
   >("basic");
@@ -128,7 +129,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       form.restaurant;
 
     const payload = {
-      name: (form.name ?? "NoName").trim(), // todo use user model
+      name: userEmail,
       restaurant: (restaurantName ?? "").trim(),
       tipAmount: Number(form.tipAmount),
       role: form.role,

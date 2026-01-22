@@ -28,9 +28,8 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
     const query = searchQuery.toLowerCase();
     return restaurants.filter(
       (r) =>
-        r.name.toLowerCase().includes(query) ||
-        r.city.toLowerCase().includes(query) ||
-        r.cuisine.toLowerCase().includes(query),
+        r.restaurant.toLowerCase().includes(query) ||
+        r.city.toLowerCase().includes(query),
     );
   }, [searchQuery, restaurants]);
 
@@ -81,7 +80,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
           new Map(data.map((tip: any) => [tip.restaurant, tip])).values(),
         );
 
-        console.log(uniqueRestaurants);
+        console.log("uniqueRestaurants", uniqueRestaurants);
         setRestaurants(uniqueRestaurants);
       } catch (err) {
         console.error(err);
