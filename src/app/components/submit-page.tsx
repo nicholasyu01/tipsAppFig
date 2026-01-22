@@ -177,7 +177,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                     id="grossTips"
                     type="number"
                     step="0.01"
-                    placeholder="270.00"
+                    placeholder="00.00"
                     defaultValue={formData.grossTips}
                     {...register("grossTips", { required: true, min: 0 })}
                   />
