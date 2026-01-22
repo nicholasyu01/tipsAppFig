@@ -1,40 +1,164 @@
-import { useState } from 'react';
-import { ArrowLeft, TrendingUp, Users, DollarSign, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@/app/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card';
-import { Badge } from '@/app/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
-import { Alert, AlertDescription } from '@/app/components/ui/alert';
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
+import { Button } from "@/app/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/app/components/ui/card";
+import { Badge } from "@/app/components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/app/components/ui/tabs";
+import { Alert, AlertDescription } from "@/app/components/ui/alert";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/app/components/ui/select';
+} from "@/app/components/ui/select";
 import {
   getRestaurantById,
   getStatsForRestaurant,
   getSubmissionsForRestaurant,
+  Restaurant,
   roleLabels,
   shiftTimeLabels,
   type Role,
   type ShiftTimeOfDay,
-} from '@/data/mockData';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+} from "@/data/mockData";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { supabase } from "../lib/supabaseClient";
+import { get } from "react-hook-form";
 
 interface RestaurantDetailPageProps {
   restaurantId: string;
   onBack: () => void;
 }
 
-export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailPageProps) {
-  const restaurant = getRestaurantById(restaurantId);
-  const allStats = getStatsForRestaurant(restaurantId);
-  
-  const [selectedRole, setSelectedRole] = useState<Role | 'all'>('all');
-  const [selectedShiftTime, setSelectedShiftTime] = useState<ShiftTimeOfDay | 'all'>('all');
+export function RestaurantDetailPage({
+  restaurantId,
+  onBack,
+}: RestaurantDetailPageProps) {
+  // const allStats = getStatsForRestaurant(restaurantId);
 
+  const [selectedRole, setSelectedRole] = useState<Role | "all">("all");
+  const [selectedShiftTime, setSelectedShiftTime] = useState<
+    ShiftTimeOfDay | "all"
+  >("all");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
+  const [restaurant, setRestaurant] = useState<Restaurant>(null);
+  const [allStats, setAllStats] = useState<Restaurant[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<any[]>([]);
+
+  const getRestaurantById = (name: string) =>
+    restaurants.find((r) => r.name === name);
+
+  const getStatsForRestaurant = (
+    restaurantId: string,
+    role?: Role,
+    shiftTime?: ShiftTimeOfDay,
+  ) => {
+    return restaurants.filter((s) => {
+      if (s.restaurant !== restaurantId) return false;
+      if (role && s.role !== role) return false;
+      // if (shiftTime && s.shiftTimeOfDay !== shiftTime) return false;
+      return true;
+    });
+  };
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      setLoadingRestaurants(true);
+      try {
+        const { data, error } = await supabase
+          .from("tips")
+          .select(
+            `createdAt, date, id, name, restaurant, role, shiftStartTime, tipAmount, tipStructure`,
+          );
+
+        if (error) {
+          console.error("Error fetching restaurants:", error);
+          setRestaurants([]);
+          return;
+        }
+
+        const rows = (data ?? []) as any[];
+        const map = new Map<string, Restaurant>();
+
+        rows.forEach((r) => {
+          const id = r.id;
+          if (!id) return;
+
+          if (!map.has(String(id))) {
+            map.set(String(id), {
+              id: String(id),
+              name: r.restaurant,
+              city: r.city ?? "Vancouver",
+              state: r.state ?? "BC",
+              cuisine: r.cuisine ?? "",
+              priceRange: (r.price_range ?? r.priceRange ?? "$") as any,
+              serviceStyle: (r.service_style ??
+                r.serviceStyle ??
+                "casual") as any,
+              tipModel: (r.tipStructure ??
+                r.tipStructure ??
+                "individual") as any,
+              poolDistribution: "",
+              creditCardFeeDeduction: Boolean(false),
+            });
+          }
+        });
+
+        setRestaurants(data);
+        const selectedRest = data.find((r) => r.restaurant === restaurantId);
+        console.log("selectedRest", selectedRest);
+        setRestaurant(selectedRest);
+        const allStats = data.filter((s) => {
+          if (s.restaurant !== restaurantId) return false;
+          return true;
+        });
+        setAllStats(allStats);
+        console.log("allStats", allStats);
+
+        const availableRoles = Array.from(
+          new Set(allStats.map((s) => s.role.toLowerCase())),
+        );
+        console.log("availableRoles", availableRoles);
+
+        setAvailableRoles(availableRoles);
+      } catch (err) {
+        console.error(err);
+        setRestaurants([]);
+      } finally {
+        setLoadingRestaurants(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
   if (!restaurant) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -47,21 +171,28 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
     );
   }
 
-  const filteredStats = allStats.filter(stat => {
-    if (selectedRole !== 'all' && stat.role !== selectedRole) return false;
-    if (selectedShiftTime !== 'all' && stat.shiftTimeOfDay !== selectedShiftTime) return false;
+  const filteredStats = allStats.filter((stat) => {
+    if (selectedRole !== "all" && stat.role.toLowerCase() !== selectedRole)
+      return false;
+    if (
+      selectedShiftTime !== "all" &&
+      stat.shiftTimeOfDay !== selectedShiftTime
+    )
+      return false;
     return true;
   });
 
   // Get unique roles and shift times from stats
-  const availableRoles = Array.from(new Set(allStats.map(s => s.role)));
-  const availableShiftTimes = Array.from(new Set(allStats.map(s => s.shiftTimeOfDay)));
+  // const availableRoles = Array.from(new Set(allStats.map((s) => s.role)));
+  // const availableShiftTimes = Array.from(
+  //   new Set(allStats?.map((s) => s.shiftTimeOfDay)),
+  // );
 
   // Prepare data for distribution chart
   const getDistributionData = () => {
     if (filteredStats.length === 0) return [];
-    
-    return filteredStats.map(stat => ({
+
+    return filteredStats?.map((stat) => ({
       name: `${roleLabels[stat.role]} - ${shiftTimeLabels[stat.shiftTimeOfDay]}`,
       median: stat.medianNetTips,
       p25: stat.percentile25,
@@ -74,10 +205,11 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
 
   // Day of week analysis for selected combination
   const getDayOfWeekData = () => {
+    console.log("restuarantId", restaurantId);
     const submissions = getSubmissionsForRestaurant(
       restaurantId,
-      selectedRole !== 'all' ? selectedRole : undefined,
-      selectedShiftTime !== 'all' ? selectedShiftTime : undefined
+      selectedRole !== "all" ? selectedRole : undefined,
+      selectedShiftTime !== "all" ? selectedShiftTime : undefined,
     );
 
     const dayGroups: Record<string, number[]> = {
@@ -90,7 +222,7 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
       Sunday: [],
     };
 
-    submissions.forEach(sub => {
+    submissions.forEach((sub) => {
       if (dayGroups[sub.dayOfWeek]) {
         dayGroups[sub.dayOfWeek].push(sub.netTips);
       }
@@ -98,7 +230,10 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
 
     return Object.entries(dayGroups).map(([day, tips]) => ({
       day: day.slice(0, 3),
-      avgTips: tips.length > 0 ? Math.round(tips.reduce((a, b) => a + b, 0) / tips.length) : 0,
+      avgTips:
+        tips.length > 0
+          ? Math.round(tips.reduce((a, b) => a + b, 0) / tips.length)
+          : 0,
       count: tips.length,
     }));
   };
@@ -117,30 +252,34 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
 
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
-              <p className="text-lg text-muted-foreground">
-                {restaurant.city}, {restaurant.state} · {restaurant.cuisine}
+              <h1 className="text-3xl font-bold mb-2 capitalize">
+                {restaurant.restaurant}
+              </h1>
+              <p className="text-lg text-muted-foreground capitalize">
+                Vancouver, BC
               </p>
             </div>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
+            {/* <Badge variant="secondary" className="text-lg px-4 py-2">
               {restaurant.priceRange}
-            </Badge>
+            </Badge> */}
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="capitalize">
-              {restaurant.serviceStyle.replace('_', ' ')}
+            {/* <Badge variant="outline" className="capitalize">
+              {restaurant.serviceStyle.replace("_", " ")}
+            </Badge> */}
+            <Badge
+              variant={restaurant.tipModel === "pool" ? "default" : "secondary"}
+            >
+              {restaurant.tipStructure === "pool" && "Tip Pool"}
+              {restaurant.tipStructure === "individual" && "Individual Tips"}
+              {restaurant.tipStructure === "hybrid" && "Hybrid Tips"}
             </Badge>
-            <Badge variant={restaurant.tipModel === 'pool' ? 'default' : 'secondary'}>
-              {restaurant.tipModel === 'pool' && 'Tip Pool'}
-              {restaurant.tipModel === 'individual' && 'Individual Tips'}
-              {restaurant.tipModel === 'hybrid' && 'Hybrid Tips'}
-            </Badge>
-            {restaurant.poolDistribution && (
+            {/* {restaurant.poolDistribution && (
               <Badge variant="outline" className="capitalize">
-                {restaurant.poolDistribution.replace('_', ' ')} distribution
+                {restaurant.poolDistribution.replace("_", " ")} distribution
               </Badge>
-            )}
+            )} */}
             {restaurant.creditCardFeeDeduction && (
               <Badge variant="outline">CC Fee Deduction</Badge>
             )}
@@ -154,13 +293,16 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium">Role:</label>
-              <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as Role | 'all')}>
+              <Select
+                value={selectedRole}
+                onValueChange={(v) => setSelectedRole(v as Role | "all")}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  {availableRoles.map(role => (
+                  {availableRoles.map((role) => (
                     <SelectItem key={role} value={role}>
                       {roleLabels[role]}
                     </SelectItem>
@@ -169,22 +311,27 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
               </Select>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <label className="text-sm font-medium">Shift:</label>
-              <Select value={selectedShiftTime} onValueChange={(v) => setSelectedShiftTime(v as ShiftTimeOfDay | 'all')}>
+              <Select
+                value={selectedShiftTime}
+                onValueChange={(v) =>
+                  setSelectedShiftTime(v as ShiftTimeOfDay | "all")
+                }
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Shifts</SelectItem>
-                  {availableShiftTimes.map(shift => (
+                  {availableShiftTimes.map((shift) => (
                     <SelectItem key={shift} value={shift}>
                       {shiftTimeLabels[shift]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -195,40 +342,54 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
           <Alert>
             <AlertCircle className="size-4" />
             <AlertDescription>
-              No earnings data available for this combination. Try adjusting your filters or be the first to submit data.
+              No earnings data available for this combination. Try adjusting
+              your filters or be the first to submit data.
             </AlertDescription>
           </Alert>
         ) : (
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList>
+            {/* <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="distribution">Distribution</TabsTrigger>
               <TabsTrigger value="trends">Trends</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             <TabsContent value="overview" className="space-y-6">
               {/* Key Metrics Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredStats.slice(0, 4).map(stat => (
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredStats.slice(0, 4).map((stat) => (
                   <Card key={`${stat.role}-${stat.shiftTimeOfDay}`}>
                     <CardHeader className="pb-3">
                       <CardDescription className="text-xs">
-                        {roleLabels[stat.role]} · {shiftTimeLabels[stat.shiftTimeOfDay]}
+                        {roleLabels[stat.role]} ·{" "}
+                        {shiftTimeLabels[stat.shiftTimeOfDay]}
                       </CardDescription>
-                      <CardTitle className="text-2xl">${stat.medianHourly}/hr</CardTitle>
+                      <CardTitle className="text-2xl">
+                        ${stat.medianHourly}/hr
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Median tips:</span>
-                        <span className="font-medium">${stat.medianNetTips}</span>
+                        <span className="text-muted-foreground">
+                          Median tips:
+                        </span>
+                        <span className="font-medium">
+                          ${stat.medianNetTips}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Range:</span>
-                        <span className="font-medium">${stat.percentile25} - ${stat.percentile75}</span>
+                        <span className="font-medium">
+                          ${stat.percentile25} - ${stat.percentile75}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Confidence:</span>
-                        <span className="font-medium">{stat.confidenceScore}%</span>
+                        <span className="text-muted-foreground">
+                          Confidence:
+                        </span>
+                        <span className="font-medium">
+                          {stat.confidenceScore}%
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>{stat.submissionCount} submissions</span>
@@ -236,43 +397,54 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                     </CardContent>
                   </Card>
                 ))}
-              </div>
+              </div> */}
 
               {/* Detailed Stats Table */}
               <Card>
                 <CardHeader>
                   <CardTitle>All Earnings Data</CardTitle>
-                  <CardDescription>
-                    Showing all available role and shift combinations with earnings data
-                  </CardDescription>
+                  {/* <CardDescription>
+                    Showing all available role and shift combinations with
+                    earnings data
+                  </CardDescription> */}
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-3 px-2 font-medium">Role</th>
-                          <th className="text-left py-3 px-2 font-medium">Shift</th>
-                          <th className="text-right py-3 px-2 font-medium">Median Tips</th>
-                          <th className="text-right py-3 px-2 font-medium">25th-75th</th>
-                          <th className="text-right py-3 px-2 font-medium">Effective $/hr</th>
-                          <th className="text-right py-3 px-2 font-medium">Avg Hours</th>
-                          <th className="text-right py-3 px-2 font-medium">Submissions</th>
+                          <th className="text-left py-3 px-2 font-medium">
+                            Role
+                          </th>
+                          <th className="text-left py-3 px-2 font-medium">
+                            Date
+                          </th>
+                          <th className="text-right py-3 px-2 font-medium">
+                            Tips
+                          </th>
+                          <th className="text-right py-3 px-2 font-medium">
+                            Start time
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredStats.map(stat => (
-                          <tr key={`${stat.role}-${stat.shiftTimeOfDay}`} className="border-b hover:bg-gray-50">
-                            <td className="py-3 px-2">{roleLabels[stat.role]}</td>
-                            <td className="py-3 px-2">{shiftTimeLabels[stat.shiftTimeOfDay]}</td>
-                            <td className="text-right py-3 px-2 font-medium">${stat.medianNetTips}</td>
-                            <td className="text-right py-3 px-2 text-sm text-muted-foreground">
-                              ${stat.percentile25} - ${stat.percentile75}
+                        {filteredStats.map((stat) => (
+                          <tr
+                            key={stat.id}
+                            className="border-b hover:bg-gray-50"
+                          >
+                            <td className="py-3 px-2">{stat.role}</td>
+                            <td className="py-3 px-2">
+                              {new Date(stat.date).toLocaleDateString()}
                             </td>
-                            <td className="text-right py-3 px-2 font-medium">${stat.medianHourly}</td>
-                            <td className="text-right py-3 px-2">{stat.avgHoursPerShift}h</td>
-                            <td className="text-right py-3 px-2 text-sm text-muted-foreground">
-                              {stat.submissionCount}
+                            <td className="text-right py-3 px-2 font-medium">
+                              ${stat.tipAmount}
+                            </td>
+                            <td className="text-right py-3 px-2 font-medium">
+                              {stat.shiftStartTime}
+                            </td>
+                            <td className="text-right py-3 px-2 font-medium">
+                              ${stat.medianHourly}
                             </td>
                           </tr>
                         ))}
@@ -288,32 +460,61 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                 <CardHeader>
                   <CardTitle>Earnings Distribution</CardTitle>
                   <CardDescription>
-                    Median tips per shift with 25th-75th percentile range (interquartile range)
+                    Median tips per shift with 25th-75th percentile range
+                    (interquartile range)
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={distributionData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-                      <YAxis label={{ value: 'Net Tips ($)', angle: -90, position: 'insideLeft' }} />
+                      <XAxis
+                        dataKey="name"
+                        angle={-45}
+                        textAnchor="end"
+                        height={120}
+                      />
+                      <YAxis
+                        label={{
+                          value: "Net Tips ($)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }}
+                      />
                       <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
+                            console.log("tooltip data", data);
                             return (
                               <div className="bg-white p-3 border rounded shadow-lg">
                                 <p className="font-medium mb-2">{data.name}</p>
-                                <p className="text-sm">Median: <span className="font-medium">${data.median}</span></p>
-                                <p className="text-sm">Range: ${data.p25} - ${data.p75}</p>
-                                <p className="text-sm">Hourly: <span className="font-medium">${data.hourly}/hr</span></p>
+                                <p className="text-sm">
+                                  Median:{" "}
+                                  <span className="font-medium">
+                                    ${data.median}
+                                  </span>
+                                </p>
+                                <p className="text-sm">
+                                  Range: ${data.p25} - ${data.p75}
+                                </p>
+                                <p className="text-sm">
+                                  Hourly:{" "}
+                                  <span className="font-medium">
+                                    ${data.hourly}/hr
+                                  </span>
+                                </p>
                               </div>
                             );
                           }
                           return null;
                         }}
                       />
-                      <Bar dataKey="median" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="median"
+                        fill="#10b981"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -324,17 +525,22 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                   <CardHeader className="pb-3">
                     <CardDescription>Highest Earning</CardDescription>
                     <CardTitle className="text-xl">
-                      {filteredStats.reduce((max, s) => s.medianHourly > max.medianHourly ? s : max).medianHourly > 0
-                        ? `$${filteredStats.reduce((max, s) => s.medianHourly > max.medianHourly ? s : max).medianHourly}/hr`
-                        : 'N/A'}
+                      {filteredStats.reduce((max, s) =>
+                        s.medianHourly > max.medianHourly ? s : max,
+                      ).medianHourly > 0
+                        ? `$${filteredStats.reduce((max, s) => (s.medianHourly > max.medianHourly ? s : max)).medianHourly}/hr`
+                        : "N/A"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      {filteredStats.length > 0 && (() => {
-                        const top = filteredStats.reduce((max, s) => s.medianHourly > max.medianHourly ? s : max);
-                        return `${roleLabels[top.role]} - ${shiftTimeLabels[top.shiftTimeOfDay]}`;
-                      })()}
+                      {filteredStats.length > 0 &&
+                        (() => {
+                          const top = filteredStats.reduce((max, s) =>
+                            s.medianHourly > max.medianHourly ? s : max,
+                          );
+                          return `${roleLabels[top.role]} - ${shiftTimeLabels[top.shiftTimeOfDay]}`;
+                        })()}
                     </p>
                   </CardContent>
                 </Card>
@@ -343,14 +549,18 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                   <CardHeader className="pb-3">
                     <CardDescription>Most Consistent</CardDescription>
                     <CardTitle className="text-xl">
-                      {filteredStats.length > 0 && (() => {
-                        const mostConsistent = filteredStats.reduce((min, s) => {
-                          const range = s.percentile75 - s.percentile25;
-                          const minRange = min.percentile75 - min.percentile25;
-                          return range < minRange ? s : min;
-                        });
-                        return `$${mostConsistent.percentile75 - mostConsistent.percentile25} spread`;
-                      })()}
+                      {filteredStats.length > 0 &&
+                        (() => {
+                          const mostConsistent = filteredStats.reduce(
+                            (min, s) => {
+                              const range = s.percentile75 - s.percentile25;
+                              const minRange =
+                                min.percentile75 - min.percentile25;
+                              return range < minRange ? s : min;
+                            },
+                          );
+                          return `$${mostConsistent.percentile75 - mostConsistent.percentile25} spread`;
+                        })()}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -364,7 +574,10 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                   <CardHeader className="pb-3">
                     <CardDescription>Total Data Points</CardDescription>
                     <CardTitle className="text-xl">
-                      {filteredStats.reduce((sum, s) => sum + s.submissionCount, 0)}
+                      {filteredStats.reduce(
+                        (sum, s) => sum + s.submissionCount,
+                        0,
+                      )}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -389,7 +602,13 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                     <BarChart data={dayOfWeekData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="day" />
-                      <YAxis label={{ value: 'Avg Tips ($)', angle: -90, position: 'insideLeft' }} />
+                      <YAxis
+                        label={{
+                          value: "Avg Tips ($)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }}
+                      />
                       <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
@@ -397,8 +616,15 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                             return (
                               <div className="bg-white p-3 border rounded shadow-lg">
                                 <p className="font-medium mb-1">{data.day}</p>
-                                <p className="text-sm">Avg Tips: <span className="font-medium">${data.avgTips}</span></p>
-                                <p className="text-sm text-muted-foreground">{data.count} shifts</p>
+                                <p className="text-sm">
+                                  Avg Tips:{" "}
+                                  <span className="font-medium">
+                                    ${data.avgTips}
+                                  </span>
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {data.count} shifts
+                                </p>
                               </div>
                             );
                           }
@@ -409,7 +635,11 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
                         {dayOfWeekData.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={['Fri', 'Sat', 'Sun'].includes(entry.day) ? '#10b981' : '#94a3b8'}
+                            fill={
+                              ["Fri", "Sat", "Sun"].includes(entry.day)
+                                ? "#10b981"
+                                : "#94a3b8"
+                            }
                           />
                         ))}
                       </Bar>
@@ -421,8 +651,9 @@ export function RestaurantDetailPage({ restaurantId, onBack }: RestaurantDetailP
               <Alert>
                 <TrendingUp className="size-4" />
                 <AlertDescription>
-                  <strong>Insight:</strong> Weekend shifts typically show 20-40% higher earnings compared to weekday shifts.
-                  Consider this when planning your schedule.
+                  <strong>Insight:</strong> Weekend shifts typically show 20-40%
+                  higher earnings compared to weekday shifts. Consider this when
+                  planning your schedule.
                 </AlertDescription>
               </Alert>
             </TabsContent>

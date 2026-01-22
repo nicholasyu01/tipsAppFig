@@ -77,7 +77,12 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
           }
         });
 
-        setRestaurants(Array.from(map.values()));
+        const uniqueRestaurants = Array.from(
+          new Map(data.map((tip: any) => [tip.restaurant, tip])).values(),
+        );
+
+        console.log(uniqueRestaurants);
+        setRestaurants(uniqueRestaurants);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -214,17 +219,17 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               <Card
                 key={restaurant.id}
                 className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => onSelectRestaurant(restaurant.id)}
+                onClick={() => onSelectRestaurant(restaurant.restaurant)}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1 capitalize">
-                        {restaurant.name}
+                        {restaurant.restaurant}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1">
                         <MapPin className="size-3" />
-                        {restaurant.city}, {restaurant.state}
+                        Vancouver, BC
                       </CardDescription>
                     </div>
                     {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
@@ -238,7 +243,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                       {restaurant.serviceStyle.replace("_", " ")}
                     </Badge> */}
                     <Badge className="text-xs capitalize">
-                      {restaurant.tipModel == "individual"
+                      {restaurant.tipStructure == "individual"
                         ? "Individual Tips"
                         : "Tip Pool"}
                     </Badge>
@@ -251,9 +256,11 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
                           <p className="text-sm text-gray-600 mb-1">
-                            Average Tips per Shift
+                            Latest tip submission
                           </p>
-                          <p className="font-semibold text-lg">150</p>
+                          <p className="font-semibold text-lg">
+                            {restaurant.tipAmount}
+                          </p>
                         </div>
                         {/* <TrendingUp className="size-5 text-green-600" /> */}
                       </div>
@@ -284,7 +291,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
           })}
         </div>
 
-        {filteredRestaurants.length === 0 && (
+        {filteredRestaurants.length === 0 && !loadingRestaurants && (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">
               No restaurants found matching "{searchQuery}"
