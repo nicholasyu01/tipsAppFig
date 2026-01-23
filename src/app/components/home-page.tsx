@@ -27,9 +27,8 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
 
     const query = searchQuery.toLowerCase();
     return restaurants.filter(
-      (r) =>
-        r.restaurant.toLowerCase().includes(query) ||
-        r.city.toLowerCase().includes(query),
+      (r) => r.restaurant.toLowerCase().includes(query),
+      //|| r.city.toLowerCase().includes(query),
     );
   }, [searchQuery, restaurants]);
 
