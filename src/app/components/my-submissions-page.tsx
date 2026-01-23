@@ -77,10 +77,8 @@ export function MySubmissionsPage({
   );
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [totalEarnings, setTotalEarnings] = useState<number>(0);
   const [totalHours, setTotalHours] = useState<number>(0);
   const [avgHourly, setAvgHourly] = useState<number>(0);
-  const [avgTipsPerShift, setAvgTipsPerShift] = useState<number>(1);
 
   // Get unique roles and shifts from submissions
   const uniqueRoles = Array.from(new Set(restaurants.map((s) => s.role)));
@@ -109,6 +107,16 @@ export function MySubmissionsPage({
           return 0;
       }
     });
+
+  const totalEarnings = filteredSubmissions.reduce(
+    (sum, s) => sum + s.tipAmount,
+    0,
+  );
+
+  const avgTipsPerShift =
+    filteredSubmissions.length > 0
+      ? totalEarnings / filteredSubmissions.length
+      : 0;
 
   // Calculate summary stats
   // const totalEarnings = submissions.reduce((sum, s) => sum + s.netTips, 0);
@@ -201,13 +209,6 @@ export function MySubmissionsPage({
         console.log("data", data);
         const myData = data.filter((r) => r.name === userEmail);
         setRestaurants(myData);
-
-        const totalEarnings = myData.reduce((sum, s) => sum + s.tipAmount, 0);
-        setTotalEarnings(totalEarnings);
-
-        const avgTipsPerShift =
-          myData.length > 0 ? totalEarnings / myData.length : 0;
-        setAvgTipsPerShift(avgTipsPerShift);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -274,7 +275,9 @@ export function MySubmissionsPage({
                     <TrendingUp className="size-4" />
                     Avg per Shift
                   </CardDescription>
-                  <CardTitle className="text-2xl">${avgTipsPerShift}</CardTitle>
+                  <CardTitle className="text-2xl">
+                    ${Math.round(avgTipsPerShift)}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -307,7 +310,7 @@ export function MySubmissionsPage({
                     Total Shifts
                   </CardDescription>
                   <CardTitle className="text-2xl">
-                    {restaurants.length}
+                    {filteredSubmissions.length}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
