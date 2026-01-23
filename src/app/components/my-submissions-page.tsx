@@ -461,7 +461,7 @@ export function MySubmissionsPage({
                                 {/* <Badge variant="secondary capitalize">
                                   {submission.role}
                                 </Badge> */}
-                                <Badge variant="outline">
+                                {/* <Badge variant="outline">
                                   {(() => {
                                     const t = submission.shiftStartTime;
                                     if (!t) return null;
@@ -488,7 +488,7 @@ export function MySubmissionsPage({
 
                                     return t;
                                   })()}
-                                </Badge>
+                                </Badge> */}
                               </div>
 
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
