@@ -142,6 +142,9 @@ export function RestaurantDetailPage({
         });
         setAllStats(allStats);
         console.log("allStats", allStats);
+        // console.log("allStats", JSON.stringify(allStats));
+
+        // calculate aggregate data
 
         const availableRoles = Array.from(
           new Set(allStats.map((s) => s.role.toLowerCase())),
@@ -182,6 +185,15 @@ export function RestaurantDetailPage({
     return true;
   });
 
+  const aggregateStats = [
+    {
+      id: 1,
+      averageTips:
+        filteredStats.reduce((sum, s) => sum + s.tipAmount, 0) /
+        filteredStats.length,
+    },
+  ];
+
   // Get unique roles and shift times from stats
   // const availableRoles = Array.from(new Set(allStats.map((s) => s.role)));
   // const availableShiftTimes = Array.from(
@@ -195,13 +207,12 @@ export function RestaurantDetailPage({
     return filteredStats?.map((stat) => ({
       name: `${roleLabels[stat.role]} - ${shiftTimeLabels[stat.shiftTimeOfDay]}`,
       median: stat.medianNetTips,
-      p25: stat.percentile25,
-      p75: stat.percentile75,
       hourly: stat.medianHourly,
     }));
   };
 
   const distributionData = getDistributionData();
+  console.log("distributionData", distributionData);
 
   // Day of week analysis for selected combination
   const getDayOfWeekData = () => {
@@ -356,48 +367,45 @@ export function RestaurantDetailPage({
 
             <TabsContent value="overview" className="space-y-6">
               {/* Key Metrics Grid */}
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredStats.slice(0, 4).map((stat) => (
-                  <Card key={`${stat.role}-${stat.shiftTimeOfDay}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {aggregateStats.slice(0, 4).map((stat) => (
+                  <Card key={`${stat.id}`}>
                     <CardHeader className="pb-3">
                       <CardDescription className="text-xs">
-                        {roleLabels[stat.role]} ·{" "}
-                        {shiftTimeLabels[stat.shiftTimeOfDay]}
+                        Average Tips Per Shift
                       </CardDescription>
                       <CardTitle className="text-2xl">
-                        ${stat.medianHourly}/hr
+                        ${stat.averageTips}/shift
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                      {/* <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
                           Median tips:
                         </span>
-                        <span className="font-medium">
-                          ${stat.medianNetTips}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
+                        <span className="font-medium">${10}</span>
+                      </div> */}
+                      {/* <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Range:</span>
                         <span className="font-medium">
                           ${stat.percentile25} - ${stat.percentile75}
                         </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
+                      </div> */}
+                      {/* <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
                           Confidence:
                         </span>
                         <span className="font-medium">
                           {stat.confidenceScore}%
                         </span>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>{stat.submissionCount} submissions</span>
+                        <span>{filteredStats.length} submissions</span>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-              </div> */}
+              </div>
 
               {/* Detailed Stats Table */}
               <Card>
