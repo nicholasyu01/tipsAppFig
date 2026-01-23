@@ -134,7 +134,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
       tipAmount: Number(form.tipAmount),
       role: form.role,
       date: form.date,
-      shiftStartTime: form.shiftStartTime,
+      shiftStartTime: "00:00", // form.shiftStartTime
       tipStructure: form.tipStructure,
       createdAt: new Date().toISOString(),
     };
@@ -341,9 +341,6 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date">Date *</Label>
                     <Input
@@ -354,7 +351,20 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       max={new Date().toISOString().split("T")[0]}
                     />
                   </div>
-                  <div className="space-y-2">
+                </div>
+
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
+                {/* <div className="space-y-2">
+                    <Label htmlFor="date">Date *</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={form.date}
+                      onChange={update("date")}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </div> */}
+                {/* <div className="space-y-2">
                     <Label htmlFor="shiftStartTime">Start Time *</Label>
                     <Input
                       id="shiftStartTime"
@@ -363,9 +373,9 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       value={form.shiftStartTime}
                       onChange={update("shiftStartTime")}
                     />
-                  </div>
+                  </div> */}
 
-                  {/* <div className="space-y-2">
+                {/* <div className="space-y-2">
                     <Label htmlFor="shiftType">Shift Type *</Label>
                     <Select
                       defaultValue={formData.shiftType}
@@ -397,7 +407,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       </SelectContent>
                     </Select>
                     </div> */}
-                </div>
+                {/* </div> */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* <div className="space-y-2">

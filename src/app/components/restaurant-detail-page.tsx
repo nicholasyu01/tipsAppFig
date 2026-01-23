@@ -422,9 +422,9 @@ export function RestaurantDetailPage({
                           <th className="text-right py-3 px-2 font-medium">
                             Tips
                           </th>
-                          <th className="text-right py-3 px-2 font-medium">
+                          {/* <th className="text-right py-3 px-2 font-medium">
                             Start time
-                          </th>
+                          </th> */}
                         </tr>
                       </thead>
                       <tbody>
@@ -442,12 +442,12 @@ export function RestaurantDetailPage({
                             <td className="text-right py-3 px-2 font-medium">
                               ${stat.tipAmount}
                             </td>
-                            <td className="text-right py-3 px-2 font-medium">
+                            {/* <td className="text-right py-3 px-2 font-medium">
                               {stat.shiftStartTime}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
                               ${stat.medianHourly}
-                            </td>
+                            </td> */}
                           </tr>
                         ))}
                       </tbody>
