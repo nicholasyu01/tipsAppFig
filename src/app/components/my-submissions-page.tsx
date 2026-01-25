@@ -116,7 +116,8 @@ export function MySubmissionsPage({
 
   const avgTipsPerShift =
     filteredSubmissions.length > 0
-      ? totalEarnings / filteredSubmissions.length
+      ? totalEarnings /
+        filteredSubmissions.reduce((sum, s) => sum + s.shiftsWorked, 0)
       : 0;
 
   // Calculate summary stats
@@ -178,7 +179,7 @@ export function MySubmissionsPage({
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
           );
 
         if (error) {
@@ -322,7 +323,10 @@ export function MySubmissionsPage({
                     Total Shifts
                   </CardDescription>
                   <CardTitle className="text-2xl">
-                    {filteredSubmissions.length}
+                    {filteredSubmissions.reduce(
+                      (sum, s) => sum + s.shiftsWorked,
+                      0,
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -473,6 +477,10 @@ export function MySubmissionsPage({
                                 <h3 className="font-semibold text-lg capitalize">
                                   {submission?.restaurant}
                                 </h3>
+                                <p className="flex text-xs text-muted-foreground gap-1 items-center">
+                                  <MapPin className="size-3" />
+                                  {submission.address}
+                                </p>
                                 {/* <Badge variant="secondary capitalize">
                                   {submission.role}
                                 </Badge> */}
@@ -506,16 +514,8 @@ export function MySubmissionsPage({
                                 </Badge> */}
                               </div>
 
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-3">
                                 <div>
-                                  <p className="text-L text-muted-foreground capitlaize ">
-                                    {" "}
-                                    {roleLabels[submission.role]}
-                                  </p>
-                                  <p className="flex text-xs text-muted-foreground gap-1 items-center">
-                                    <MapPin className="size-3" />
-                                    {submission.address}
-                                  </p>
                                   <p className="font-medium">
                                     {new Date(
                                       submission.date,
@@ -528,8 +528,15 @@ export function MySubmissionsPage({
                                   <p className="text-xs text-muted-foreground">
                                     {submission.dayOfWeek}
                                   </p>
+                                  <p className="text-L text-muted-foreground capitlaize ">
+                                    {" "}
+                                    {roleLabels[submission.role]}
+                                  </p>
+                                </div>
+
+                                <div>
                                   <p className="text-xs text-muted-foreground">
-                                    Net Tips
+                                    Tips
                                   </p>
                                   <p className="font-semibold text-green-600 text-lg">
                                     ${submission.tipAmount}
@@ -537,25 +544,21 @@ export function MySubmissionsPage({
                                 </div>
 
                                 <div>
-                                  {/* <p className="text-xs text-muted-foreground">
-                                    Net Tips
-                                  </p>
-                                  <p className="font-semibold text-green-600 text-lg">
-                                    ${submission.tipAmount}
-                                  </p> */}
-                                </div>
-                                {/* 
-                                <div>
                                   <p className="text-xs text-muted-foreground">
-                                    Effective Hourly
+                                    Shifts Worked
                                   </p>
                                   <p className="font-medium">
-                                    ${submission.effectiveHourly}/hr
+                                    {submission.shiftsWorked}
                                   </p>
+                                </div>
+                                <div>
                                   <p className="text-xs text-muted-foreground">
-                                    {submission.hoursWorked}h worked
+                                    Hours
                                   </p>
-                                </div> */}
+                                  <p className="font-medium">
+                                    {submission.hours}
+                                  </p>
+                                </div>
                                 {/* 
                                 <div>
                                   <p className="text-xs text-muted-foreground">
