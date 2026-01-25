@@ -53,9 +53,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { supabase } from "../lib/supabaseClient";
+import { useUser } from "@/app/lib/userContext";
 
 interface MySubmissionsPageProps {
-  userEmail?: string | null;
   onBack: () => void;
   submissions: ShiftSubmission[];
   onDeleteSubmission: (id: string) => void;
@@ -64,7 +64,6 @@ interface MySubmissionsPageProps {
 type SortOption = "date-desc" | "date-asc" | "earnings-desc" | "earnings-asc";
 
 export function MySubmissionsPage({
-  userEmail,
   onBack,
   submissions,
   onDeleteSubmission,
@@ -80,6 +79,7 @@ export function MySubmissionsPage({
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [totalHours, setTotalHours] = useState<number>(0);
   const [avgHourly, setAvgHourly] = useState<number>(0);
+  const { user } = useUser();
 
   // Get unique roles and shifts from submissions
   const uniqueRoles = Array.from(new Set(restaurants.map((s) => s.role)));
@@ -165,6 +165,13 @@ export function MySubmissionsPage({
   };
 
   useEffect(() => {
+    // Wait for user to be available before fetching user-specific submissions
+    if (!user?.email) {
+      setLoadingRestaurants(false);
+      setRestaurants([]);
+      return;
+    }
+
     const fetchRestaurants = async () => {
       setLoadingRestaurants(true);
       try {
@@ -181,16 +188,22 @@ export function MySubmissionsPage({
         }
 
         const rows = (data ?? []) as any[];
+
+        // Try matching against multiple possible fields that might contain the submitter's email
+        const myRows = rows.filter((r) => {
+          const submitter = (r.name ?? r.user_email ?? r.email ?? "") as string;
+          return submitter === user.email;
+        });
+
+        // Map raw rows to the Restaurant shape if possible, otherwise store empty array
         const map = new Map<string, Restaurant>();
-
-        rows.forEach((r) => {
-          const id = r.id;
-          if (!id) return;
-
-          if (!map.has(String(id))) {
-            map.set(String(id), {
-              id: String(id),
-              name: r.restaurant,
+        myRows.forEach((r) => {
+          const rid = r.id;
+          if (!rid) return;
+          if (!map.has(String(rid))) {
+            map.set(String(rid), {
+              id: String(rid),
+              name: r.restaurant ?? r.name ?? "",
               city: r.city ?? "Vancouver",
               state: r.state ?? "BC",
               cuisine: r.cuisine ?? "",
@@ -207,9 +220,7 @@ export function MySubmissionsPage({
           }
         });
 
-        console.log("data", data);
-        const myData = data.filter((r) => r.name === userEmail);
-        setRestaurants(myData);
+        setRestaurants(myRows);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -219,7 +230,7 @@ export function MySubmissionsPage({
     };
 
     fetchRestaurants();
-  }, []);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50">
