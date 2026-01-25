@@ -144,6 +144,8 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       shiftStartTime: "00:00", // form.shiftStartTime
       tipStructure: form.tipStructure,
       createdAt: new Date().toISOString(),
+      shiftsWorked: Number(form.shiftsWorked),
+      hours: Number(form.hours),
     };
     console.log("Submitting tip payload:", payload);
 
@@ -166,6 +168,8 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
         date: "",
         shiftStartTime: "",
         tipStructure: "individual",
+        shiftsWorked: 1,
+        hours: 8,
       });
       setCurrentStep("success");
     } catch (err) {
