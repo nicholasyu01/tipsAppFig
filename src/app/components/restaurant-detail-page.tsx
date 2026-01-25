@@ -55,11 +55,13 @@ import { get } from "react-hook-form";
 
 interface RestaurantDetailPageProps {
   restaurantId: string;
+  restaurantAddress: string;
   onBack: () => void;
 }
 
 export function RestaurantDetailPage({
   restaurantId,
+  restaurantAddress,
   onBack,
 }: RestaurantDetailPageProps) {
   // const allStats = getStatsForRestaurant(restaurantId);
@@ -133,13 +135,18 @@ export function RestaurantDetailPage({
         });
 
         setRestaurants(data);
-        const selectedRest = data.find((r) => r.restaurant === restaurantId);
+        console.log("fetched restaurants data:", restaurantAddress);
+        const selectedRest = data.find(
+          (r) =>
+            r.restaurant === restaurantId && r.address === restaurantAddress,
+        );
         console.log("selectedRest", selectedRest);
         setRestaurant(selectedRest);
-        const allStats = data.filter((s) => {
-          if (s.restaurant !== restaurantId) return false;
-          return true;
-        });
+        const allStats = data.filter(
+          (item) =>
+            item.restaurant.toLowerCase() === restaurantId.toLowerCase() &&
+            item.address === restaurantAddress,
+        );
         setAllStats(allStats);
         console.log("allStats", allStats);
         // console.log("allStats", JSON.stringify(allStats));

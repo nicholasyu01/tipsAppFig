@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useUser } from "@/app/lib/userContext";
 // using local controlled form state for submission
 import { ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
@@ -36,7 +37,6 @@ import { supabase } from "../lib/supabaseClient";
 import PlacesAutocomplete from "./placesAutoComplete";
 
 interface SubmitPageProps {
-  userEmail?: string | null;
   onBack: () => void;
 }
 
@@ -54,7 +54,8 @@ interface ShiftFormData {
   hoursWorked: number;
 }
 
-export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
+export function SubmitPage({ onBack }: SubmitPageProps) {
+  const { user } = useUser();
   const [currentStep, setCurrentStep] = useState<
     "basic" | "earnings" | "review" | "success"
   >("basic");
@@ -66,6 +67,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
   const [form, setForm] = useState({
     name: "",
     restaurant: "",
+    address: "",
     tipAmount: "",
     role: "Server",
     date: "",
@@ -131,8 +133,9 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
       form.restaurant;
 
     const payload = {
-      name: userEmail,
+      name: user?.email ?? null,
       restaurant: (restaurantName ?? "").trim(),
+      address: form.address || "",
       tipAmount: Number(form.tipAmount),
       role: form.role,
       date: form.date,
@@ -155,6 +158,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
       setForm({
         name: "",
         restaurant: "",
+        address: "",
         tipAmount: "",
         role: "Server",
         date: "",

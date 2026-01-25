@@ -14,7 +14,7 @@ import { getStatsForRestaurant, type Restaurant } from "@/data/mockData";
 import { supabase } from "@/app/lib/supabaseClient";
 
 interface HomePageProps {
-  onSelectRestaurant: (restaurantId: string) => void;
+  onSelectRestaurant: (restaurantId: string, address?: string) => void;
 }
 
 export function HomePage({ onSelectRestaurant }: HomePageProps) {
@@ -217,7 +217,9 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               <Card
                 key={restaurant.id}
                 className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => onSelectRestaurant(restaurant.restaurant)}
+                onClick={() =>
+                  onSelectRestaurant(restaurant.restaurant, restaurant.address)
+                }
               >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
@@ -269,9 +271,9 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                         earnings data
                       </div> */}
 
-                      <Button variant="outline" className="w-full">
+                      {/* <Button variant="outline" className="w-full">
                         See More
-                      </Button>
+                      </Button> */}
                     </div>
                   ) : (
                     <div className="text-center py-4">
