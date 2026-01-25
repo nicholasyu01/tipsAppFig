@@ -96,7 +96,7 @@ export function RestaurantDetailPage({
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
           );
 
         if (error) {
@@ -267,7 +267,7 @@ export function RestaurantDetailPage({
                 {restaurant.restaurant}
               </h1>
               <p className="text-lg text-muted-foreground capitalize">
-                Vancouver, BC
+                {restaurant.address}
               </p>
             </div>
             {/* <Badge variant="secondary" className="text-lg px-4 py-2">
