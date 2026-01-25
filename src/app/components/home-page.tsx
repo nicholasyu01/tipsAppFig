@@ -39,7 +39,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
           );
 
         if (error) {
@@ -76,7 +76,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
         });
 
         const uniqueRestaurants = Array.from(
-          new Map(data.map((tip: any) => [tip.restaurant, tip])).values(),
+          new Map(data.map((tip: any) => [tip.address, tip])).values(),
         );
 
         console.log("uniqueRestaurants", uniqueRestaurants);
@@ -227,7 +227,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1">
                         <MapPin className="size-3" />
-                        Vancouver, BC
+                        {restaurant.address}
                       </CardDescription>
                     </div>
                     {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}

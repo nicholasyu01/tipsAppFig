@@ -6,7 +6,10 @@ import {
   LogOut,
   User,
   FileText,
+  Menu,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 
@@ -34,6 +37,111 @@ interface HeaderProps {
   submissionCount?: number;
 }
 
+function MobileMenu({
+  currentView,
+  onNavigate,
+  isAuthenticated,
+  onAuthClick,
+  onSignOut,
+  onClose,
+}: {
+  currentView: HeaderProps["currentView"];
+  onNavigate: HeaderProps["onNavigate"];
+  isAuthenticated: boolean;
+  onAuthClick: () => void;
+  onSignOut: () => Promise<void> | void;
+  onClose: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const handleNavigate = (view: any) => {
+    onNavigate(view);
+    setOpen(false);
+    onClose();
+  };
+
+  return (
+    <div className="relative">
+      <button
+        aria-label="Open menu"
+        aria-expanded={open}
+        onClick={() => setOpen((s) => !s)}
+        className="p-2 rounded-md hover:bg-gray-100"
+      >
+        {open ? <X className="size-5" /> : <Menu className="size-5" />}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-50">
+          <div className="flex flex-col py-1">
+            <button
+              className="text-left px-4 py-2 hover:bg-gray-50"
+              onClick={() => handleNavigate("home")}
+            >
+              <div className="flex items-center gap-2">
+                <Search className="size-4" />
+                <span>Browse</span>
+              </div>
+            </button>
+
+            <button
+              className="text-left px-4 py-2 hover:bg-gray-50"
+              onClick={() => handleNavigate("submit")}
+            >
+              <div className="flex items-center gap-2">
+                <PlusCircle className="size-4" />
+                <span>My Cashout</span>
+              </div>
+            </button>
+
+            <button
+              className="text-left px-4 py-2 hover:bg-gray-50"
+              onClick={() => handleNavigate("my-submissions")}
+            >
+              <div className="flex items-center gap-2">
+                <FileText className="size-4" />
+                <span>History</span>
+              </div>
+            </button>
+
+            <div className="border-t mt-1" />
+
+            {isAuthenticated ? (
+              <button
+                className="text-left px-4 py-2 hover:bg-gray-50"
+                onClick={() => {
+                  setOpen(false);
+                  onSignOut();
+                  onClose();
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <LogOut className="size-4" />
+                  <span>Sign out</span>
+                </div>
+              </button>
+            ) : (
+              <button
+                className="text-left px-4 py-2 hover:bg-gray-50"
+                onClick={() => {
+                  setOpen(false);
+                  onAuthClick();
+                  onClose();
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <User className="size-4" />
+                  <span>Sign in</span>
+                </div>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Header({
   currentView,
   onNavigate,
@@ -55,17 +163,19 @@ export function Header({
             <span>Ca$hOut</span>
           </button>
 
-          <nav className="flex items-center gap-2">
-            <Button
-              variant={currentView === "home" ? "default" : "ghost"}
-              onClick={() => onNavigate("home")}
-              className="gap-2"
-            >
-              <Search className="size-4" />
-              <span className="hidden sm:inline">Browse</span>
-            </Button>
+          <div className="flex items-center gap-3">
+            {/* Desktop nav: hidden on small screens */}
+            <nav className="hidden sm:flex items-end gap-2">
+              <Button
+                variant={currentView === "home" ? "default" : "ghost"}
+                onClick={() => onNavigate("home")}
+                className="gap-2"
+              >
+                <Search className="size-4" />
+                <span className="hidden sm:inline">Browse</span>
+              </Button>
 
-            {/* <Button
+              {/* <Button
               variant={currentView === "compare" ? "default" : "ghost"}
               onClick={() => onNavigate("compare")}
               className="gap-2"
@@ -74,22 +184,22 @@ export function Header({
               <span className="hidden sm:inline">Compare</span>
             </Button> */}
 
-            <Button
-              variant={currentView === "submit" ? "default" : "ghost"}
-              onClick={() => onNavigate("submit")}
-              className="gap-2"
-            >
-              <PlusCircle className="size-4" />
-              <span className="hidden sm:inline">My Cashout</span>
-            </Button>
-            <Button
-              variant={currentView === "my-submissions" ? "default" : "ghost"}
-              onClick={() => onNavigate("my-submissions")}
-              className="gap-2 relative"
-            >
-              <FileText className="size-4" />
-              <span className="hidden sm:inline">History</span>
-              {/* {submissionCount > 0 && (
+              <Button
+                variant={currentView === "submit" ? "default" : "ghost"}
+                onClick={() => onNavigate("submit")}
+                className="gap-2"
+              >
+                <PlusCircle className="size-4" />
+                <span className="hidden sm:inline">My Cashout</span>
+              </Button>
+              <Button
+                variant={currentView === "my-submissions" ? "default" : "ghost"}
+                onClick={() => onNavigate("my-submissions")}
+                className="gap-2 relative"
+              >
+                <FileText className="size-4" />
+                <span className="hidden sm:inline">History</span>
+                {/* {submissionCount > 0 && (
                 <Badge
                   variant="secondary"
                   className="ml-1 px-1.5 py-0 text-xs h-5 min-w-5"
@@ -97,35 +207,45 @@ export function Header({
                   {submissionCount}
                 </Badge>
               )} */}
-            </Button>
-          </nav>
-
-          <div className="flex items-center gap-3">
+              </Button>
+              <div>
+                {isAuthenticated ? (
+                  <Button
+                    variant="ghost"
+                    className="gap-2"
+                    onClick={() => onSignOut()}
+                  >
+                    <LogOut className="size-4" />
+                    <span className="hidden sm:inline">Sign out</span>
+                  </Button>
+                ) : (
+                  <Button
+                    variant={currentView === "auth" ? "default" : "ghost"}
+                    className="gap-2"
+                    onClick={onAuthClick}
+                  >
+                    <User className="size-4" />
+                    <span className="hidden sm:inline">Sign in</span>
+                  </Button>
+                )}
+              </div>
+            </nav>
+            {/* Mobile hamburger menu */}
+            <div className="sm:hidden relative">
+              <MobileMenu
+                currentView={currentView}
+                onNavigate={onNavigate}
+                isAuthenticated={isAuthenticated}
+                onAuthClick={onAuthClick}
+                onSignOut={onSignOut}
+                onClose={() => {}}
+              />
+            </div>
             {/* {isAuthenticated && userEmail && (
               <Badge variant="outline" className="hidden sm:inline-flex">
                 {userEmail}
               </Badge>
             )} */}
-
-            {isAuthenticated ? (
-              <Button
-                variant="ghost"
-                className="gap-2"
-                onClick={() => onSignOut()}
-              >
-                <LogOut className="size-4" />
-                <span className="hidden sm:inline">Sign out</span>
-              </Button>
-            ) : (
-              <Button
-                variant={currentView === "auth" ? "default" : "ghost"}
-                className="gap-2"
-                onClick={onAuthClick}
-              >
-                <User className="size-4" />
-                <span className="hidden sm:inline">Sign in</span>
-              </Button>
-            )}
           </div>
         </div>
       </div>

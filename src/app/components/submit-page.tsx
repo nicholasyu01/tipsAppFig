@@ -33,6 +33,7 @@ import {
   type Restaurant,
 } from "@/data/mockData";
 import { supabase } from "../lib/supabaseClient";
+import PlacesAutocomplete from "./placesAutoComplete";
 
 interface SubmitPageProps {
   userEmail?: string | null;
@@ -95,7 +96,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
       return "Valid tip amount is required";
     if (!form.role) return "Role is required";
     if (!form.date) return "Date is required";
-    if (!form.shiftStartTime) return "Shift start time is required";
+    // if (!form.shiftStartTime) return "Shift start time is required";
     return null;
   }
 
@@ -117,6 +118,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
     e.preventDefault();
     const err = validate();
     if (err) {
+      console.error("Validation error:", err);
       setMessage(err);
       return;
     }
@@ -273,9 +275,9 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       Total tips before tip-out
                     </p> */}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="restaurant">Restaurant *</Label>
-                  {/* <Select
+                {/* <div className="space-y-2">
+                  <Label htmlFor="restaurant">Restaurant *</Label> */}
+                {/* <Select
                     defaultValue={form.restaurant}
                     onValueChange={(value: string) =>
                       setForm((s) => ({ ...s, restaurant: value }))
@@ -292,11 +294,24 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       ))}
                     </SelectContent>
                   </Select> */}
-                  <Input
+                {/* <Input
                     id="restaurantId"
                     placeholder="Enter restaurant name"
                     value={form.restaurant}
                     onChange={update("restaurant")}
+                  />
+                </div> */}
+                <div className="space-y-2">
+                  <Label htmlFor="restaurant">Restaurant *</Label>
+                  <PlacesAutocomplete
+                    onSelect={(place) => {
+                      console.log("Selected place:", place);
+                      setForm((s) => ({
+                        ...s,
+                        restaurant: place.displayName.text || "",
+                        address: place.formattedAddress,
+                      }));
+                    }}
                   />
                 </div>
 
@@ -514,8 +529,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                     !form.tipAmount ||
                     !form.restaurant ||
                     !form.role ||
-                    !form.date ||
-                    !form.shiftStartTime
+                    !form.date
                   }
                 >
                   Save

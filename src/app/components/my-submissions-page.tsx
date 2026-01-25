@@ -8,6 +8,7 @@ import {
   Filter,
   Trash2,
   Edit,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import {
@@ -170,7 +171,7 @@ export function MySubmissionsPage({
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
           );
 
         if (error) {
@@ -496,8 +497,13 @@ export function MySubmissionsPage({
 
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                                 <div>
-                                  <p className="text-L text-muted-foreground capitlaize">
-                                    {submission.role}
+                                  <p className="text-L text-muted-foreground capitlaize ">
+                                    {" "}
+                                    {roleLabels[submission.role]}
+                                  </p>
+                                  <p className="flex text-xs text-muted-foreground gap-1 items-center">
+                                    <MapPin className="size-3" />
+                                    {submission.address}
                                   </p>
                                   <p className="font-medium">
                                     {new Date(
