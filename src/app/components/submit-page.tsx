@@ -73,6 +73,8 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     date: "",
     shiftStartTime: "",
     tipStructure: "individual",
+    shiftsWorked: 1,
+    hours: 8,
   });
 
   const grossTips = Number(form.tipAmount) || Number(formData.grossTips) || 0;
@@ -370,6 +372,30 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       max={new Date().toISOString().split("T")[0]}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="shiftsWorked">Shifts *</Label>
+                  <Input
+                    id="shiftsWorked"
+                    type="number"
+                    step="1"
+                    placeholder="Shifts Worked"
+                    value={form.shiftsWorked}
+                    onChange={update("shiftsWorked")}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="hours">Hours *</Label>
+                  <Input
+                    id="hours"
+                    type="number"
+                    step="1"
+                    placeholder="Hours Worked"
+                    value={form.hours}
+                    onChange={update("hours")}
+                  />
                 </div>
 
                 {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}

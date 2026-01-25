@@ -13,6 +13,7 @@ import { RestaurantDetailPage } from "@/app/components/restaurant-detail-page";
 import { SubmitPage } from "@/app/components/submit-page";
 import { ComparePage } from "@/app/components/compare-page";
 import { AuthPage } from "@/app/components/auth-page";
+import ResetPasswordPage from "@/app/components/reset-password-page";
 import { Toaster } from "@/app/components/ui/sonner";
 import { supabase } from "@/app/lib/supabaseClient";
 import { UserProvider, useUser } from "@/app/lib/userContext";
@@ -193,6 +194,7 @@ function InnerApp() {
           path="/auth"
           element={<AuthPage onAuthSuccess={handleAuthSuccess} />}
         />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           path="/my-submissions"
           element={

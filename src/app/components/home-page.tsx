@@ -27,8 +27,9 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
 
     const query = searchQuery.toLowerCase();
     return restaurants.filter(
-      (r) => r.restaurant.toLowerCase().includes(query),
-      //|| r.city.toLowerCase().includes(query),
+      (r) =>
+        r.restaurant.toLowerCase().includes(query) ||
+        r.address.toLowerCase().includes(query),
     );
   }, [searchQuery, restaurants]);
 
@@ -39,7 +40,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
           );
 
         if (error) {
@@ -121,8 +122,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               Real data from hospitality workers
             </h1>
             <p className="text-xl text-green-50 mb-8">
-              See actual tips, hourly rates, and shift earnings from industry
-              professionals.
+              See actual tips earnings from industry professionals like you.
             </p>
 
             {/* Search Bar */}
@@ -130,7 +130,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Search by restaurant name or city..."
+                placeholder="Search by restaurant name or address..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 h-14 text-base bg-white text-gray-900"
@@ -242,7 +242,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     {/* <Badge variant="outline" className="text-xs capitalize">
                       {restaurant.serviceStyle.replace("_", " ")}
                     </Badge> */}
-                    <Badge className="text-xs capitalize">
+                    <Badge variant="default" className="text-xs capitalize">
                       {restaurant.tipStructure == "individual"
                         ? "Individual Tips"
                         : "Tip Pool"}
