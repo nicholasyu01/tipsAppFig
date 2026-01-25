@@ -55,11 +55,13 @@ import { get } from "react-hook-form";
 
 interface RestaurantDetailPageProps {
   restaurantId: string;
+  restaurantAddress: string;
   onBack: () => void;
 }
 
 export function RestaurantDetailPage({
   restaurantId,
+  restaurantAddress,
   onBack,
 }: RestaurantDetailPageProps) {
   // const allStats = getStatsForRestaurant(restaurantId);
@@ -96,7 +98,7 @@ export function RestaurantDetailPage({
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
           );
 
         if (error) {
@@ -133,13 +135,18 @@ export function RestaurantDetailPage({
         });
 
         setRestaurants(data);
-        const selectedRest = data.find((r) => r.restaurant === restaurantId);
+        console.log("fetched restaurants data:", restaurantAddress);
+        const selectedRest = data.find(
+          (r) =>
+            r.restaurant === restaurantId && r.address === restaurantAddress,
+        );
         console.log("selectedRest", selectedRest);
         setRestaurant(selectedRest);
-        const allStats = data.filter((s) => {
-          if (s.restaurant !== restaurantId) return false;
-          return true;
-        });
+        const allStats = data.filter(
+          (item) =>
+            item.restaurant.toLowerCase() === restaurantId.toLowerCase() &&
+            item.address === restaurantAddress,
+        );
         setAllStats(allStats);
         console.log("allStats", allStats);
         // console.log("allStats", JSON.stringify(allStats));
@@ -190,7 +197,7 @@ export function RestaurantDetailPage({
       id: 1,
       averageTips:
         filteredStats.reduce((sum, s) => sum + s.tipAmount, 0) /
-        filteredStats.length,
+        filteredStats.reduce((sum, s) => sum + s.shiftsWorked, 0),
     },
   ];
 
@@ -279,12 +286,9 @@ export function RestaurantDetailPage({
             {/* <Badge variant="outline" className="capitalize">
               {restaurant.serviceStyle.replace("_", " ")}
             </Badge> */}
-            <Badge
-              variant={restaurant.tipModel === "pool" ? "default" : "secondary"}
-            >
+            <Badge variant="default" className="text-xs capitalize">
               {restaurant.tipStructure === "pool" && "Tip Pool"}
               {restaurant.tipStructure === "individual" && "Individual Tips"}
-              {restaurant.tipStructure === "hybrid" && "Hybrid Tips"}
             </Badge>
             {/* {restaurant.poolDistribution && (
               <Badge variant="outline" className="capitalize">
@@ -400,7 +404,13 @@ export function RestaurantDetailPage({
                         </span>
                       </div> */}
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>{filteredStats.length} submissions</span>
+                        <span>
+                          {filteredStats.reduce(
+                            (sum, s) => sum + s.shiftsWorked,
+                            0,
+                          )}{" "}
+                          shifts submitted
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -430,6 +440,12 @@ export function RestaurantDetailPage({
                           <th className="text-right py-3 px-2 font-medium">
                             Tips
                           </th>
+                          <th className="text-right py-3 px-2 font-medium">
+                            Shift(s)
+                          </th>
+                          <th className="text-right py-3 px-2 font-medium">
+                            Hours
+                          </th>
                           {/* <th className="text-right py-3 px-2 font-medium">
                             Start time
                           </th> */}
@@ -449,6 +465,12 @@ export function RestaurantDetailPage({
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
                               ${stat.tipAmount}
+                            </td>
+                            <td className="text-right py-3 px-2 font-medium">
+                              {stat.shiftsWorked}
+                            </td>
+                            <td className="text-right py-3 px-2 font-medium">
+                              {stat.hours}
                             </td>
                             {/* <td className="text-right py-3 px-2 font-medium">
                               {stat.shiftStartTime}

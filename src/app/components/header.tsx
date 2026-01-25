@@ -10,6 +10,8 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useUser } from "@/app/lib/userContext";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 
@@ -31,7 +33,6 @@ interface HeaderProps {
       | "my-submissions",
   ) => void;
   isAuthenticated: boolean;
-  userEmail?: string | null;
   onAuthClick: () => void;
   onSignOut: () => Promise<void> | void;
   submissionCount?: number;
@@ -53,6 +54,19 @@ function MobileMenu({
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  const getActiveView = (path: string) => {
+    if (path === "/") return "home";
+    if (path.startsWith("/restaurant")) return "restaurant";
+    if (path === "/submit") return "submit";
+    if (path === "/compare") return "compare";
+    if (path === "/auth") return "auth";
+    if (path === "/my-submissions") return "my-submissions";
+    return "home";
+  };
+
+  const activeView = getActiveView(location.pathname);
 
   const handleNavigate = (view: any) => {
     onNavigate(view);
@@ -75,7 +89,9 @@ function MobileMenu({
         <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-50">
           <div className="flex flex-col py-1">
             <button
-              className="text-left px-4 py-2 hover:bg-gray-50"
+              className={`text-left px-4 py-2 hover:bg-gray-50 ${
+                activeView === "home" ? "bg-gray-100 font-semibold" : ""
+              }`}
               onClick={() => handleNavigate("home")}
             >
               <div className="flex items-center gap-2">
@@ -85,7 +101,9 @@ function MobileMenu({
             </button>
 
             <button
-              className="text-left px-4 py-2 hover:bg-gray-50"
+              className={`text-left px-4 py-2 hover:bg-gray-50 ${
+                activeView === "submit" ? "bg-gray-100 font-semibold" : ""
+              }`}
               onClick={() => handleNavigate("submit")}
             >
               <div className="flex items-center gap-2">
@@ -95,7 +113,11 @@ function MobileMenu({
             </button>
 
             <button
-              className="text-left px-4 py-2 hover:bg-gray-50"
+              className={`text-left px-4 py-2 hover:bg-gray-50 ${
+                activeView === "my-submissions"
+                  ? "bg-gray-100 font-semibold"
+                  : ""
+              }`}
               onClick={() => handleNavigate("my-submissions")}
             >
               <div className="flex items-center gap-2">
@@ -108,7 +130,9 @@ function MobileMenu({
 
             {isAuthenticated ? (
               <button
-                className="text-left px-4 py-2 hover:bg-gray-50"
+                className={`text-left px-4 py-2 hover:bg-gray-50 ${
+                  activeView === "auth" ? "bg-gray-100 font-semibold" : ""
+                }`}
                 onClick={() => {
                   setOpen(false);
                   onSignOut();
@@ -122,7 +146,9 @@ function MobileMenu({
               </button>
             ) : (
               <button
-                className="text-left px-4 py-2 hover:bg-gray-50"
+                className={`text-left px-4 py-2 hover:bg-gray-50 ${
+                  activeView === "auth" ? "bg-gray-100 font-semibold" : ""
+                }`}
                 onClick={() => {
                   setOpen(false);
                   onAuthClick();
@@ -146,13 +172,26 @@ export function Header({
   currentView,
   onNavigate,
   isAuthenticated,
-  userEmail,
   onAuthClick,
   onSignOut,
   submissionCount = 0,
 }: HeaderProps) {
+  const { user } = useUser();
+  const location = useLocation();
+
+  const getActiveView = (path: string) => {
+    if (path === "/") return "home";
+    if (path.startsWith("/restaurant")) return "restaurant";
+    if (path === "/submit") return "submit";
+    if (path === "/compare") return "compare";
+    if (path === "/auth") return "auth";
+    if (path === "/my-submissions") return "my-submissions";
+    return "home";
+  };
+
+  const activeView = getActiveView(location.pathname);
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
+    <header className="border-b bg-white sticky top-1 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <button
@@ -167,7 +206,7 @@ export function Header({
             {/* Desktop nav: hidden on small screens */}
             <nav className="hidden sm:flex items-end gap-2">
               <Button
-                variant={currentView === "home" ? "default" : "ghost"}
+                variant={activeView === "home" ? "default" : "ghost"}
                 onClick={() => onNavigate("home")}
                 className="gap-2"
               >
@@ -185,7 +224,7 @@ export function Header({
             </Button> */}
 
               <Button
-                variant={currentView === "submit" ? "default" : "ghost"}
+                variant={activeView === "submit" ? "default" : "ghost"}
                 onClick={() => onNavigate("submit")}
                 className="gap-2"
               >
@@ -193,7 +232,7 @@ export function Header({
                 <span className="hidden sm:inline">My Cashout</span>
               </Button>
               <Button
-                variant={currentView === "my-submissions" ? "default" : "ghost"}
+                variant={activeView === "my-submissions" ? "default" : "ghost"}
                 onClick={() => onNavigate("my-submissions")}
                 className="gap-2 relative"
               >
@@ -211,7 +250,7 @@ export function Header({
               <div>
                 {isAuthenticated ? (
                   <Button
-                    variant="ghost"
+                    variant={activeView === "auth" ? "default" : "ghost"}
                     className="gap-2"
                     onClick={() => onSignOut()}
                   >
@@ -220,7 +259,7 @@ export function Header({
                   </Button>
                 ) : (
                   <Button
-                    variant={currentView === "auth" ? "default" : "ghost"}
+                    variant={activeView === "auth" ? "default" : "ghost"}
                     className="gap-2"
                     onClick={onAuthClick}
                   >
@@ -241,9 +280,9 @@ export function Header({
                 onClose={() => {}}
               />
             </div>
-            {/* {isAuthenticated && userEmail && (
+            {/* {isAuthenticated && user?.email && (
               <Badge variant="outline" className="hidden sm:inline-flex">
-                {userEmail}
+                {user.email}
               </Badge>
             )} */}
           </div>

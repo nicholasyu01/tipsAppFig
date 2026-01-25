@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useUser } from "@/app/lib/userContext";
 // using local controlled form state for submission
 import { ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
@@ -36,7 +37,6 @@ import { supabase } from "../lib/supabaseClient";
 import PlacesAutocomplete from "./placesAutoComplete";
 
 interface SubmitPageProps {
-  userEmail?: string | null;
   onBack: () => void;
 }
 
@@ -54,7 +54,8 @@ interface ShiftFormData {
   hoursWorked: number;
 }
 
-export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
+export function SubmitPage({ onBack }: SubmitPageProps) {
+  const { user } = useUser();
   const [currentStep, setCurrentStep] = useState<
     "basic" | "earnings" | "review" | "success"
   >("basic");
@@ -66,11 +67,14 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
   const [form, setForm] = useState({
     name: "",
     restaurant: "",
+    address: "",
     tipAmount: "",
     role: "Server",
     date: "",
     shiftStartTime: "",
     tipStructure: "individual",
+    shiftsWorked: 1,
+    hours: 8,
   });
 
   const grossTips = Number(form.tipAmount) || Number(formData.grossTips) || 0;
@@ -131,8 +135,9 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
       form.restaurant;
 
     const payload = {
-      name: userEmail,
+      name: user?.email ?? null,
       restaurant: (restaurantName ?? "").trim(),
+      address: form.address || "",
       tipAmount: Number(form.tipAmount),
       role: form.role,
       date: form.date,
@@ -155,6 +160,7 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
       setForm({
         name: "",
         restaurant: "",
+        address: "",
         tipAmount: "",
         role: "Server",
         date: "",
@@ -366,6 +372,30 @@ export function SubmitPage({ userEmail, onBack }: SubmitPageProps) {
                       max={new Date().toISOString().split("T")[0]}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="shiftsWorked">Shifts *</Label>
+                  <Input
+                    id="shiftsWorked"
+                    type="number"
+                    step="1"
+                    placeholder="Shifts Worked"
+                    value={form.shiftsWorked}
+                    onChange={update("shiftsWorked")}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="hours">Hours *</Label>
+                  <Input
+                    id="hours"
+                    type="number"
+                    step="1"
+                    placeholder="Hours Worked"
+                    value={form.hours}
+                    onChange={update("hours")}
+                  />
                 </div>
 
                 {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}

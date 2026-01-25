@@ -53,9 +53,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { supabase } from "../lib/supabaseClient";
+import { useUser } from "@/app/lib/userContext";
 
 interface MySubmissionsPageProps {
-  userEmail?: string | null;
   onBack: () => void;
   submissions: ShiftSubmission[];
   onDeleteSubmission: (id: string) => void;
@@ -64,7 +64,6 @@ interface MySubmissionsPageProps {
 type SortOption = "date-desc" | "date-asc" | "earnings-desc" | "earnings-asc";
 
 export function MySubmissionsPage({
-  userEmail,
   onBack,
   submissions,
   onDeleteSubmission,
@@ -80,6 +79,7 @@ export function MySubmissionsPage({
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [totalHours, setTotalHours] = useState<number>(0);
   const [avgHourly, setAvgHourly] = useState<number>(0);
+  const { user } = useUser();
 
   // Get unique roles and shifts from submissions
   const uniqueRoles = Array.from(new Set(restaurants.map((s) => s.role)));
@@ -116,7 +116,8 @@ export function MySubmissionsPage({
 
   const avgTipsPerShift =
     filteredSubmissions.length > 0
-      ? totalEarnings / filteredSubmissions.length
+      ? totalEarnings /
+        filteredSubmissions.reduce((sum, s) => sum + s.shiftsWorked, 0)
       : 0;
 
   // Calculate summary stats
@@ -165,13 +166,20 @@ export function MySubmissionsPage({
   };
 
   useEffect(() => {
+    // Wait for user to be available before fetching user-specific submissions
+    if (!user?.email) {
+      setLoadingRestaurants(false);
+      setRestaurants([]);
+      return;
+    }
+
     const fetchRestaurants = async () => {
       setLoadingRestaurants(true);
       try {
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure`,
+            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
           );
 
         if (error) {
@@ -181,16 +189,22 @@ export function MySubmissionsPage({
         }
 
         const rows = (data ?? []) as any[];
+
+        // Try matching against multiple possible fields that might contain the submitter's email
+        const myRows = rows.filter((r) => {
+          const submitter = (r.name ?? r.user_email ?? r.email ?? "") as string;
+          return submitter === user.email;
+        });
+
+        // Map raw rows to the Restaurant shape if possible, otherwise store empty array
         const map = new Map<string, Restaurant>();
-
-        rows.forEach((r) => {
-          const id = r.id;
-          if (!id) return;
-
-          if (!map.has(String(id))) {
-            map.set(String(id), {
-              id: String(id),
-              name: r.restaurant,
+        myRows.forEach((r) => {
+          const rid = r.id;
+          if (!rid) return;
+          if (!map.has(String(rid))) {
+            map.set(String(rid), {
+              id: String(rid),
+              name: r.restaurant ?? r.name ?? "",
               city: r.city ?? "Vancouver",
               state: r.state ?? "BC",
               cuisine: r.cuisine ?? "",
@@ -207,9 +221,7 @@ export function MySubmissionsPage({
           }
         });
 
-        console.log("data", data);
-        const myData = data.filter((r) => r.name === userEmail);
-        setRestaurants(myData);
+        setRestaurants(myRows);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -219,7 +231,7 @@ export function MySubmissionsPage({
     };
 
     fetchRestaurants();
-  }, []);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -311,7 +323,10 @@ export function MySubmissionsPage({
                     Total Shifts
                   </CardDescription>
                   <CardTitle className="text-2xl">
-                    {filteredSubmissions.length}
+                    {filteredSubmissions.reduce(
+                      (sum, s) => sum + s.shiftsWorked,
+                      0,
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -462,6 +477,10 @@ export function MySubmissionsPage({
                                 <h3 className="font-semibold text-lg capitalize">
                                   {submission?.restaurant}
                                 </h3>
+                                <p className="flex text-xs text-muted-foreground gap-1 items-center">
+                                  <MapPin className="size-3" />
+                                  {submission.address}
+                                </p>
                                 {/* <Badge variant="secondary capitalize">
                                   {submission.role}
                                 </Badge> */}
@@ -495,16 +514,8 @@ export function MySubmissionsPage({
                                 </Badge> */}
                               </div>
 
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-3">
                                 <div>
-                                  <p className="text-L text-muted-foreground capitlaize ">
-                                    {" "}
-                                    {roleLabels[submission.role]}
-                                  </p>
-                                  <p className="flex text-xs text-muted-foreground gap-1 items-center">
-                                    <MapPin className="size-3" />
-                                    {submission.address}
-                                  </p>
                                   <p className="font-medium">
                                     {new Date(
                                       submission.date,
@@ -517,8 +528,15 @@ export function MySubmissionsPage({
                                   <p className="text-xs text-muted-foreground">
                                     {submission.dayOfWeek}
                                   </p>
+                                  <p className="text-L text-muted-foreground capitlaize ">
+                                    {" "}
+                                    {roleLabels[submission.role]}
+                                  </p>
+                                </div>
+
+                                <div>
                                   <p className="text-xs text-muted-foreground">
-                                    Net Tips
+                                    Tips
                                   </p>
                                   <p className="font-semibold text-green-600 text-lg">
                                     ${submission.tipAmount}
@@ -526,25 +544,21 @@ export function MySubmissionsPage({
                                 </div>
 
                                 <div>
-                                  {/* <p className="text-xs text-muted-foreground">
-                                    Net Tips
-                                  </p>
-                                  <p className="font-semibold text-green-600 text-lg">
-                                    ${submission.tipAmount}
-                                  </p> */}
-                                </div>
-                                {/* 
-                                <div>
                                   <p className="text-xs text-muted-foreground">
-                                    Effective Hourly
+                                    Shifts Worked
                                   </p>
                                   <p className="font-medium">
-                                    ${submission.effectiveHourly}/hr
+                                    {submission.shiftsWorked}
                                   </p>
+                                </div>
+                                <div>
                                   <p className="text-xs text-muted-foreground">
-                                    {submission.hoursWorked}h worked
+                                    Hours
                                   </p>
-                                </div> */}
+                                  <p className="font-medium">
+                                    {submission.hours}
+                                  </p>
+                                </div>
                                 {/* 
                                 <div>
                                   <p className="text-xs text-muted-foreground">
