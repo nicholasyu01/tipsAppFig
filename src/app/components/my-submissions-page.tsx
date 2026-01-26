@@ -484,34 +484,6 @@ export function MySubmissionsPage({
                                 {/* <Badge variant="secondary capitalize">
                                   {submission.role}
                                 </Badge> */}
-                                {/* <Badge variant="outline">
-                                  {(() => {
-                                    const t = submission.shiftStartTime;
-                                    if (!t) return null;
-
-                                    // Try parsing as full date/time first
-                                    const dt = new Date(t);
-                                    if (!isNaN(dt.getTime())) {
-                                      return dt.toLocaleTimeString("en-US", {
-                                        hour: "numeric",
-                                        minute: "2-digit",
-                                      });
-                                    }
-
-                                    // Fallback for plain "HH:mm" or "H:mm"
-                                    const m =
-                                      String(t).match(/^(\d{1,2}):(\d{2})$/);
-                                    if (m) {
-                                      let hh = parseInt(m[1], 10);
-                                      const mm = m[2];
-                                      const ampm = hh >= 12 ? "PM" : "AM";
-                                      hh = ((hh + 11) % 12) + 1; // convert 0-23 -> 12-hour (1-12)
-                                      return `${hh}:${mm} ${ampm}`;
-                                    }
-
-                                    return t;
-                                  })()}
-                                </Badge> */}
                               </div>
 
                               <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-3">
@@ -557,6 +529,39 @@ export function MySubmissionsPage({
                                   </p>
                                   <p className="font-medium">
                                     {submission.hours}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground">
+                                    Start Time
+                                  </p>
+                                  <p className="font-medium">
+                                    {(() => {
+                                      const t = submission.shiftStartTime;
+                                      if (!t) return null;
+
+                                      // Try parsing as full date/time first
+                                      const dt = new Date(t);
+                                      if (!isNaN(dt.getTime())) {
+                                        return dt.toLocaleTimeString("en-US", {
+                                          hour: "numeric",
+                                          minute: "2-digit",
+                                        });
+                                      }
+
+                                      // Fallback for plain "HH:mm" or "H:mm"
+                                      const m =
+                                        String(t).match(/^(\d{1,2}):(\d{2})$/);
+                                      if (m) {
+                                        let hh = parseInt(m[1], 10);
+                                        const mm = m[2];
+                                        const ampm = hh >= 12 ? "PM" : "AM";
+                                        hh = ((hh + 11) % 12) + 1; // convert 0-23 -> 12-hour (1-12)
+                                        return `${hh}:${mm} ${ampm}`;
+                                      }
+
+                                      return t;
+                                    })()}{" "}
                                   </p>
                                 </div>
                                 {/* 

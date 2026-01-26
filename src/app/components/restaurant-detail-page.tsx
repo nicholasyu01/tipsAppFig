@@ -450,9 +450,9 @@ export function RestaurantDetailPage({
                           <th className="text-right py-3 px-2 font-medium">
                             Hours
                           </th>
-                          {/* <th className="text-right py-3 px-2 font-medium">
+                          <th className="text-right py-3 px-2 font-medium">
                             Start time
-                          </th> */}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -476,10 +476,35 @@ export function RestaurantDetailPage({
                             <td className="text-right py-3 px-2 font-medium">
                               {stat.hours}
                             </td>
-                            {/* <td className="text-right py-3 px-2 font-medium">
-                              {stat.shiftStartTime}
-                            </td>
                             <td className="text-right py-3 px-2 font-medium">
+                              {(() => {
+                                const t = stat.shiftStartTime;
+                                if (!t) return null;
+
+                                // Try parsing as full date/time first
+                                const dt = new Date(t);
+                                if (!isNaN(dt.getTime())) {
+                                  return dt.toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  });
+                                }
+
+                                // Fallback for plain "HH:mm" or "H:mm"
+                                const m =
+                                  String(t).match(/^(\d{1,2}):(\d{2})$/);
+                                if (m) {
+                                  let hh = parseInt(m[1], 10);
+                                  const mm = m[2];
+                                  const ampm = hh >= 12 ? "PM" : "AM";
+                                  hh = ((hh + 11) % 12) + 1; // convert 0-23 -> 12-hour (1-12)
+                                  return `${hh}:${mm} ${ampm}`;
+                                }
+
+                                return t;
+                              })()}{" "}
+                            </td>
+                            {/* <td className="text-right py-3 px-2 font-medium">
                               ${stat.medianHourly}
                             </td> */}
                           </tr>
