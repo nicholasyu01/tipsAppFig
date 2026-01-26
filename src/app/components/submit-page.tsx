@@ -252,7 +252,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
             <ArrowLeft className="size-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold mb-2">Cashout</h1>
+          <h1 className="text-3xl font-bold mb-2">My Cashout</h1>
           {/* <p className="text-muted-foreground">
             Help other workers by sharing your shift earnings. All submissions are anonymous.
           </p> */}
@@ -413,16 +413,16 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       max={new Date().toISOString().split("T")[0]}
                     />
                   </div> */}
-                {/* <div className="space-y-2">
-                    <Label htmlFor="shiftStartTime">Start Time *</Label>
-                    <Input
-                      id="shiftStartTime"
-                      type="time"
-                      step={900}
-                      value={form.shiftStartTime}
-                      onChange={update("shiftStartTime")}
-                    />
-                  </div> */}
+                <div className="space-y-2">
+                  <Label htmlFor="shiftStartTime">Start Time *</Label>
+                  <Input
+                    id="shiftStartTime"
+                    type="time"
+                    step={900}
+                    value={form.shiftStartTime}
+                    onChange={update("shiftStartTime")}
+                  />
+                </div>
 
                 {/* <div className="space-y-2">
                     <Label htmlFor="shiftType">Shift Type *</Label>

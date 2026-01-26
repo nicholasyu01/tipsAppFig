@@ -122,7 +122,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               Real data from hospitality workers
             </h1>
             <p className="text-xl text-green-50 mb-8">
-              See actual tips earnings from industry professionals like you.
+              See actual tips earnings from industry professionals like you
             </p>
 
             {/* Search Bar */}
@@ -228,8 +228,14 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                         {restaurant.restaurant}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1">
-                        <MapPin className="size-3" />
-                        {restaurant.address}
+                        <MapPin className="size-4" />
+                        {restaurant.address
+                          ? restaurant.address
+                              .split(",")
+                              .slice(0, 2)
+                              .map((s) => s.trim())
+                              .join(", ")
+                          : (restaurant.city ?? "")}
                       </CardDescription>
                     </div>
                     {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
