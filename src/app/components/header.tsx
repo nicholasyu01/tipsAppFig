@@ -8,9 +8,10 @@ import {
   FileText,
   Menu,
   X,
+  MessageSquareHeart,
 } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "@/app/lib/userContext";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
@@ -22,7 +23,8 @@ interface HeaderProps {
     | "submit"
     | "compare"
     | "auth"
-    | "my-submissions";
+    | "my-submissions"
+    | "feedback";
   onNavigate: (
     view:
       | "home"
@@ -30,7 +32,8 @@ interface HeaderProps {
       | "submit"
       | "compare"
       | "auth"
-      | "my-submissions",
+      | "my-submissions"
+      | "feedback",
   ) => void;
   isAuthenticated: boolean;
   onAuthClick: () => void;
@@ -62,6 +65,7 @@ function MobileMenu({
     if (path === "/submit") return "submit";
     if (path === "/compare") return "compare";
     if (path === "/auth") return "auth";
+    if (path === "/feedback") return "feedback";
     if (path === "/my-submissions") return "my-submissions";
     return "home";
   };
@@ -108,7 +112,7 @@ function MobileMenu({
             >
               <div className="flex items-center gap-2">
                 <PlusCircle className="size-4" />
-                <span>My Cashout</span>
+                <span>Submit</span>
               </div>
             </button>
 
@@ -123,6 +127,18 @@ function MobileMenu({
               <div className="flex items-center gap-2">
                 <FileText className="size-4" />
                 <span>History</span>
+              </div>
+            </button>
+
+            <button
+              className={`text-left px-4 py-2 hover:bg-gray-50 ${
+                activeView === "feedback" ? "bg-gray-100 font-semibold" : ""
+              }`}
+              onClick={() => handleNavigate("feedback")}
+            >
+              <div className="flex items-center gap-2">
+                <MessageSquareHeart className="size-4" />
+                <span>Feedback</span>
               </div>
             </button>
 
@@ -141,7 +157,7 @@ function MobileMenu({
               >
                 <div className="flex items-center gap-2">
                   <LogOut className="size-4" />
-                  <span>Sign out</span>
+                  <span>Log out</span>
                 </div>
               </button>
             ) : (
@@ -178,6 +194,7 @@ export function Header({
 }: HeaderProps) {
   const { user } = useUser();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getActiveView = (path: string) => {
     if (path === "/") return "home";
@@ -185,6 +202,7 @@ export function Header({
     if (path === "/submit") return "submit";
     if (path === "/compare") return "compare";
     if (path === "/auth") return "auth";
+    if (path === "/feedback") return "feedback";
     if (path === "/my-submissions") return "my-submissions";
     return "home";
   };
@@ -198,7 +216,7 @@ export function Header({
             onClick={() => onNavigate("home")}
             className="flex items-center gap-2 text-xl font-semibold hover:opacity-80 transition-opacity"
           >
-            <DollarSign className="size-6 text-green-600" />
+            {/* <DollarSign className="size-6 text-green-600" /> */}
             <span>Ca$hOut</span>
           </button>
 
@@ -229,7 +247,7 @@ export function Header({
                 className="gap-2"
               >
                 <PlusCircle className="size-4" />
-                <span className="hidden sm:inline">My Cashout</span>
+                <span className="hidden sm:inline">Submit</span>
               </Button>
               <Button
                 variant={activeView === "my-submissions" ? "default" : "ghost"}
@@ -255,7 +273,7 @@ export function Header({
                     onClick={() => onSignOut()}
                   >
                     <LogOut className="size-4" />
-                    <span className="hidden sm:inline">Sign out</span>
+                    <span className="hidden sm:inline">Log out</span>
                   </Button>
                 ) : (
                   <Button
@@ -264,10 +282,17 @@ export function Header({
                     onClick={onAuthClick}
                   >
                     <User className="size-4" />
-                    <span className="hidden sm:inline">Sign in</span>
+                    <span className="hidden sm:inline">Log in</span>
                   </Button>
                 )}
               </div>
+              <Button
+                variant={activeView === "feedback" ? "default" : "ghost"}
+                onClick={() => navigate("/feedback")}
+                className="gap-2"
+              >
+                <MessageSquareHeart className="size-4" />
+              </Button>
             </nav>
             {/* Mobile hamburger menu */}
             <div className="sm:hidden relative">

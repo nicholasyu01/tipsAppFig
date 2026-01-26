@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
             setError("Failed to initialize session from reset link.");
           } else {
             setTokensSet(true);
-            setMessage("Session initialized. You can set a new password.");
+            setMessage("You can set a new password.");
           }
         } catch (err) {
           console.error(err);
@@ -113,9 +113,7 @@ export default function ResetPasswordPage() {
           <CardTitle>Reset Password</CardTitle>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Enter a new password for your account. If you opened this page
-              from the reset email link, the session will be initialized
-              automatically.
+              Password must be at least 6 characters.
             </p>
           </CardContent>
         </CardHeader>

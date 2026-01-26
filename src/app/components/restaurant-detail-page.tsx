@@ -6,6 +6,7 @@ import {
   DollarSign,
   Clock,
   AlertCircle,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import {
@@ -273,9 +274,12 @@ export function RestaurantDetailPage({
               <h1 className="text-3xl font-bold mb-2 capitalize">
                 {restaurant.restaurant}
               </h1>
-              <p className="text-lg text-muted-foreground capitalize">
-                {restaurant.address}
-              </p>
+              <div className="flex items-center gap-2">
+                <MapPin className="size-4" />
+                <p className="text-lg text-muted-foreground capitalize">
+                  {restaurant.address}
+                </p>
+              </div>
             </div>
             {/* <Badge variant="secondary" className="text-lg px-4 py-2">
               {restaurant.priceRange}

@@ -14,6 +14,7 @@ import { SubmitPage } from "@/app/components/submit-page";
 import { ComparePage } from "@/app/components/compare-page";
 import { AuthPage } from "@/app/components/auth-page";
 import ResetPasswordPage from "@/app/components/reset-password-page";
+import LeaveFeedbackPage from "@/app/components/leave-feedback-page";
 import { Toaster } from "@/app/components/ui/sonner";
 import { supabase } from "@/app/lib/supabaseClient";
 import { UserProvider, useUser } from "@/app/lib/userContext";
@@ -26,6 +27,7 @@ type View =
   | "submit"
   | "compare"
   | "auth"
+  | "leave-feedback"
   | "my-submissions";
 
 const viewToPath = (view: View) => {
@@ -40,12 +42,15 @@ const viewToPath = (view: View) => {
       return "/compare";
     case "auth":
       return "/auth";
+    case "leave-feedback":
+      return "/leave-feedack";
     case "my-submissions":
       return "/my-submissions";
     default:
       return "/";
   }
 };
+const protectedViews: View[] = ["submit", "my-submissions", "leave-feedback"];
 
 export default function App() {
   return (
@@ -120,8 +125,6 @@ function InnerApp() {
     };
   }, []);
 
-  const protectedViews: View[] = ["submit", "my-submissions"];
-
   const handleNavigate = (view: View) => {
     if (protectedViews.includes(view) && !session) {
       setPendingView(view);
@@ -195,6 +198,7 @@ function InnerApp() {
           element={<AuthPage onAuthSuccess={handleAuthSuccess} />}
         />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/feedback" element={<LeaveFeedbackPage />} />
         <Route
           path="/my-submissions"
           element={
