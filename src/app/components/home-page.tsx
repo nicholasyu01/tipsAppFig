@@ -32,56 +32,19 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
         r.address.toLowerCase().includes(query),
     );
   }, [searchQuery, restaurants]);
-
   useEffect(() => {
     const fetchRestaurants = async () => {
       setLoadingRestaurants(true);
       try {
         const { data, error } = await supabase
-          .from("tips")
-          .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
-          );
+          .from("latest_restaurant_tips")
+          .select("*");
 
         if (error) {
-          console.error("Error fetching restaurants:", error);
-          setRestaurants([]);
-          return;
+          console.error(error);
+        } else {
+          setRestaurants(data ?? []);
         }
-
-        const rows = (data ?? []) as any[];
-        const map = new Map<string, Restaurant>();
-
-        rows.forEach((r) => {
-          const id = r.id;
-          if (!id) return;
-
-          if (!map.has(String(id))) {
-            map.set(String(id), {
-              id: String(id),
-              name: r.restaurant,
-              city: r.city ?? "Vancouver",
-              state: r.state ?? "BC",
-              cuisine: r.cuisine ?? "",
-              priceRange: (r.price_range ?? r.priceRange ?? "$") as any,
-              serviceStyle: (r.service_style ??
-                r.serviceStyle ??
-                "casual") as any,
-              tipModel: (r.tipStructure ??
-                r.tipStructure ??
-                "individual") as any,
-              poolDistribution: "",
-              creditCardFeeDeduction: Boolean(false),
-            });
-          }
-        });
-
-        const uniqueRestaurants = Array.from(
-          new Map(data.map((tip: any) => [tip.address, tip])).values(),
-        );
-
-        console.log("uniqueRestaurants", uniqueRestaurants);
-        setRestaurants(uniqueRestaurants);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -106,7 +69,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
     if (stats.length === 0) return null;
 
     const topStat = stats.reduce((max, curr) =>
-      curr.tipAmount > max.tipAmount ? curr : max,
+      curr.tip_amount > max.tip_amount ? curr : max,
     );
 
     return topStat;
@@ -249,7 +212,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                       {restaurant.serviceStyle.replace("_", " ")}
                     </Badge> */}
                     <Badge variant="default" className="text-xs capitalize">
-                      {restaurant.tipStructure == "individual"
+                      {restaurant.tip_structure == "individual"
                         ? "Individual Tips"
                         : "Tip Pool"}
                     </Badge>
@@ -265,7 +228,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                             Latest tip submission
                           </p>
                           <p className="font-semibold text-lg">
-                            {restaurant.tipAmount}
+                            {restaurant.tip_amount}
                           </p>
                         </div>
                         {/* <TrendingUp className="size-5 text-green-600" /> */}
