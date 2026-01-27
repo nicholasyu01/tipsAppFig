@@ -1,7 +1,10 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { use } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/app/components/ui/button";
+import { MessageSquareHeart } from "lucide-react";
 
 export default function FooterLegal() {
+  const navigate = useNavigate();
   return (
     <footer className="border-t bg-white">
       <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between">
@@ -21,6 +24,13 @@ export default function FooterLegal() {
           >
             Terms
           </Link>
+          <Button
+            variant={"ghost"}
+            onClick={() => navigate("/feedback")}
+            className="gap-2"
+          >
+            <MessageSquareHeart className="size-4" />
+          </Button>
         </div>
       </div>
     </footer>

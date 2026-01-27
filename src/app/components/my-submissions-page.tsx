@@ -320,7 +320,7 @@ export function MySubmissionsPage({
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Submissions tracked
+                    Shifts tracked
                   </p>
                 </CardContent>
               </Card>
@@ -489,18 +489,22 @@ export function MySubmissionsPage({
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
+                              <div className="flex items-center gap-3">
                                 <h3 className="font-semibold text-lg capitalize">
                                   {submission?.restaurant}
                                 </h3>
-                                <p className="flex text-xs text-muted-foreground gap-1 items-center">
-                                  <MapPin className="size-3" />
-                                  {submission.address}
-                                </p>
                                 {/* <Badge variant="secondary capitalize">
                                   {submission.role}
-                                </Badge> */}
+                                  </Badge> */}
                               </div>
+                              <p className="flex text-xs text-muted-foreground gap-1 items-center mb-2">
+                                <MapPin className="size-4" />
+                                {submission.address
+                                  .split(",")
+                                  .slice(0, 2)
+                                  .map((s) => s.trim())
+                                  .join(", ")}
+                              </p>
 
                               <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-3">
                                 <div>

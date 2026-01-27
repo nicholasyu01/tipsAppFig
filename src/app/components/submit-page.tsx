@@ -94,12 +94,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     setFormData({ ...formData, ...data });
     setCurrentStep("earnings");
   };
-  // Redirect non-signed-in users to /auth automatically
-  useEffect(() => {
-    if (user === null) {
-      navigate("/auth");
-    }
-  }, [user, navigate]);
 
   function validate() {
     // if (!form.name.trim()) return "Name is required";
