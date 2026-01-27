@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@/app/lib/userContext";
 // using local controlled form state for submission
 import { ArrowLeft, CheckCircle2, Info } from "lucide-react";
@@ -35,6 +35,7 @@ import {
 } from "@/data/mockData";
 import { supabase } from "../lib/supabaseClient";
 import PlacesAutocomplete from "./placesAutoComplete";
+import { useNavigate } from "react-router-dom";
 
 interface SubmitPageProps {
   onBack: () => void;
@@ -56,6 +57,7 @@ interface ShiftFormData {
 
 export function SubmitPage({ onBack }: SubmitPageProps) {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<
     "basic" | "earnings" | "review" | "success"
   >("basic");
@@ -92,6 +94,12 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     setFormData({ ...formData, ...data });
     setCurrentStep("earnings");
   };
+  // Redirect non-signed-in users to /auth automatically
+  useEffect(() => {
+    if (user === null) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
 
   function validate() {
     // if (!form.name.trim()) return "Name is required";
@@ -100,7 +108,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       return "Valid tip amount is required";
     if (!form.role) return "Role is required";
     if (!form.date) return "Date is required";
-    // if (!form.start_time) return "Shift start time is required";
+    if (!form.start_time) return "Shift start time is required";
     return null;
   }
 
@@ -147,7 +155,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       shifts: Number(form.shifts),
       hours: Number(form.hours),
     };
-    console.log("Submitting tip payload:", payload);
 
     try {
       // If a parent passed an onSubmit handler, call it (e.g., to persist to server)
@@ -155,7 +162,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
         await submitTip(payload);
       } else {
         // Default local behavior: log to console. Replace with API call as needed.
-        console.log("Tip submitted:", payload);
       }
       setSubmittedTips(Number(form.tip_amount));
       setMessage("Tip submitted successfully.");
@@ -186,7 +192,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
 
   const handleFinalSubmit = () => {
     // In a real app, this would send to backend
-    console.log("Submitting shift data:", formData);
     setCurrentStep("success");
   };
 
@@ -315,7 +320,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                   <Label htmlFor="restaurant">Restaurant *</Label>
                   <PlacesAutocomplete
                     onSelect={(place) => {
-                      console.log("Selected place:", place);
                       setForm((s) => ({
                         ...s,
                         restaurant: place.displayName.text || "",
@@ -563,7 +567,10 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                     !form.tip_amount ||
                     !form.restaurant ||
                     !form.role ||
-                    !form.date
+                    !form.date ||
+                    !form.shifts ||
+                    !form.hours ||
+                    !form.start_time
                   }
                 >
                   Save

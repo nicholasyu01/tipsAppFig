@@ -13,22 +13,13 @@ export type Role =
   | "bartender"
   | "barback"
   | "host"
+  | "expediter"
   | "server_assistant"
-  | "busser"
-  | "food_runner"
-  | "sommelier"
   | "manager"
-  | "general_manager"
-  | "bar_manager"
-  | "floor_manager"
-  | "assistant_general_manager"
   | "bottle_service"
-  | "prep_cook"
-  | "line_cook"
-  | "sous_chef"
-  | "jr_sous_chef"
-  | "head_chef"
-  | "chef_de_cuisine";
+  | "cook"
+  | "chef"
+  | "dishwasher";
 export type ShiftTimeOfDay =
   | "am"
   | "lunch"
@@ -526,22 +517,13 @@ export const roleLabels: Record<Role, string> = {
   bartender: "Bartender",
   barback: "Barback",
   host: "Host",
+  expediter: "Expediter",
   server_assistant: "Server Assistant",
-  busser: "Busser",
-  food_runner: "Food Runner",
-  sommelier: "Sommelier",
   bottle_service: "Bottle Service",
   manager: "Manager",
-  general_manager: "General Manager",
-  bar_manager: "Bar Manager",
-  floor_manager: "Floor Manager",
-  assistant_general_manager: "Assistant General Manager",
-  prep_cook: "Prep Cook",
-  line_cook: "Line Cook",
-  sous_chef: "Sous Chef",
-  jr_sous_chef: "Junior Sous Chef",
-  head_chef: "Head Chef",
-  chef_de_cuisine: "Chef de Cuisine",
+  cook: "Cook",
+  chef: "Chef",
+  dishwasher: "Dishwasher",
 };
 
 export const shiftTimeLabels: Record<ShiftTimeOfDay, string> = {
