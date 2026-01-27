@@ -203,11 +203,9 @@ export function RestaurantDetailPage({
   };
 
   const distributionData = getDistributionData();
-  console.log("distributionData", distributionData);
 
   // Day of week analysis for selected combination
   const getDayOfWeekData = () => {
-    console.log("restuarantId", restaurantId);
     const submissions = getSubmissionsForRestaurant(
       restaurantId,
       selectedRole !== "all" ? selectedRole : undefined,
@@ -273,7 +271,7 @@ export function RestaurantDetailPage({
             {/* <Badge variant="outline" className="capitalize">
               {restaurant.serviceStyle.replace("_", " ")}
             </Badge> */}
-            <Badge variant="default" className="text-xs capitalize">
+            <Badge variant="secondary" className="text-xs capitalize">
               {restaurant.tip_structure === "pool" && "Tip Pool"}
               {restaurant.tip_structure === "individual" && "Individual Tips"}
             </Badge>
@@ -416,21 +414,21 @@ export function RestaurantDetailPage({
                       <thead>
                         <tr className="border-b">
                           <th className="text-left py-3 px-2 font-medium">
-                            Role
+                            Date
                           </th>
                           <th className="text-left py-3 px-2 font-medium">
-                            Date
+                            Role
                           </th>
                           <th className="text-right py-3 px-2 font-medium">
                             Tips
                           </th>
                           <th className="text-right py-3 px-2 font-medium">
-                            Shift(s)
+                            Shifts
                           </th>
                           <th className="text-right py-3 px-2 font-medium">
                             Hours
                           </th>
-                          <th className="text-right py-3 px-2 font-medium">
+                          <th className="text-right py-3 px-2 font-medium whitespace-nowrap">
                             Start time
                           </th>
                         </tr>
@@ -441,11 +439,11 @@ export function RestaurantDetailPage({
                             key={stat.id}
                             className="border-b hover:bg-gray-50"
                           >
-                            <td className="py-3 px-2 capitalize">
-                              {stat.role}
-                            </td>
-                            <td className="py-3 px-2">
+                            <td className="py-3 px-2 font-medium">
                               {new Date(stat.date).toLocaleDateString()}
+                            </td>
+                            <td className="py-3 px-2 capitalize font-medium">
+                              {stat.role}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
                               ${stat.tip_amount}
@@ -456,7 +454,7 @@ export function RestaurantDetailPage({
                             <td className="text-right py-3 px-2 font-medium">
                               {stat.hours}
                             </td>
-                            <td className="text-right py-3 px-2 font-medium">
+                            <td className="text-right py-3 px-2 font-medium whitespace-nowrap">
                               {(() => {
                                 const t = stat.start_time;
                                 if (!t) return null;
@@ -526,7 +524,6 @@ export function RestaurantDetailPage({
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
-                            console.log("tooltip data", data);
                             return (
                               <div className="bg-white p-3 border rounded shadow-lg">
                                 <p className="font-medium mb-2">{data.name}</p>
