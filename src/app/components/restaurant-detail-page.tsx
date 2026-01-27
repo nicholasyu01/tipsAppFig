@@ -414,10 +414,10 @@ export function RestaurantDetailPage({
                       <thead>
                         <tr className="border-b">
                           <th className="text-left py-3 px-2 font-medium">
-                            Role
+                            Date
                           </th>
                           <th className="text-left py-3 px-2 font-medium">
-                            Date
+                            Role
                           </th>
                           <th className="text-right py-3 px-2 font-medium">
                             Tips
@@ -428,7 +428,7 @@ export function RestaurantDetailPage({
                           <th className="text-right py-3 px-2 font-medium">
                             Hours
                           </th>
-                          <th className="text-right py-3 px-2 font-medium">
+                          <th className="text-right py-3 px-2 font-medium whitespace-nowrap">
                             Start time
                           </th>
                         </tr>
@@ -439,11 +439,11 @@ export function RestaurantDetailPage({
                             key={stat.id}
                             className="border-b hover:bg-gray-50"
                           >
-                            <td className="py-3 px-2 capitalize">
-                              {stat.role}
-                            </td>
-                            <td className="py-3 px-2">
+                            <td className="py-3 px-2 font-medium">
                               {new Date(stat.date).toLocaleDateString()}
+                            </td>
+                            <td className="py-3 px-2 capitalize font-medium">
+                              {stat.role}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
                               ${stat.tip_amount}
@@ -454,7 +454,7 @@ export function RestaurantDetailPage({
                             <td className="text-right py-3 px-2 font-medium">
                               {stat.hours}
                             </td>
-                            <td className="text-right py-3 px-2 font-medium">
+                            <td className="text-right py-3 px-2 font-medium whitespace-nowrap">
                               {(() => {
                                 const t = stat.start_time;
                                 if (!t) return null;
