@@ -86,9 +86,6 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
           redirectTo: window.location.origin + "/reset-password",
         });
 
-      // Log full response for debugging (will appear in browser console)
-      console.log("resetPasswordForEmail response:", resetData, resetError);
-
       if (resetError) {
         // 500 errors can indicate SMTP or project config problems. Surface code if available.
         const code = (resetError as any)?.status ?? (resetError as any)?.code;

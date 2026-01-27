@@ -147,7 +147,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       shifts: Number(form.shifts),
       hours: Number(form.hours),
     };
-    console.log("Submitting tip payload:", payload);
 
     try {
       // If a parent passed an onSubmit handler, call it (e.g., to persist to server)
@@ -155,7 +154,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
         await submitTip(payload);
       } else {
         // Default local behavior: log to console. Replace with API call as needed.
-        console.log("Tip submitted:", payload);
       }
       setSubmittedTips(Number(form.tip_amount));
       setMessage("Tip submitted successfully.");
@@ -186,7 +184,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
 
   const handleFinalSubmit = () => {
     // In a real app, this would send to backend
-    console.log("Submitting shift data:", formData);
     setCurrentStep("success");
   };
 
@@ -315,7 +312,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                   <Label htmlFor="restaurant">Restaurant *</Label>
                   <PlacesAutocomplete
                     onSelect={(place) => {
-                      console.log("Selected place:", place);
                       setForm((s) => ({
                         ...s,
                         restaurant: place.displayName.text || "",

@@ -203,11 +203,9 @@ export function RestaurantDetailPage({
   };
 
   const distributionData = getDistributionData();
-  console.log("distributionData", distributionData);
 
   // Day of week analysis for selected combination
   const getDayOfWeekData = () => {
-    console.log("restuarantId", restaurantId);
     const submissions = getSubmissionsForRestaurant(
       restaurantId,
       selectedRole !== "all" ? selectedRole : undefined,
@@ -526,7 +524,6 @@ export function RestaurantDetailPage({
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
-                            console.log("tooltip data", data);
                             return (
                               <div className="bg-white p-3 border rounded shadow-lg">
                                 <p className="font-medium mb-2">{data.name}</p>
