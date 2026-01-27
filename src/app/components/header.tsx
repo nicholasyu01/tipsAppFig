@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   MessageSquareHeart,
+  Image,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -216,6 +217,8 @@ export function Header({
             onClick={() => onNavigate("home")}
             className="flex items-center gap-2 text-xl font-semibold hover:opacity-80 transition-opacity"
           >
+            <img src="/cashout-logo2.png" alt="Ca$hOut" className="h-12 w-12" />
+
             {/* <DollarSign className="size-6 text-green-600" /> */}
             <span>Ca$hOut</span>
           </button>

@@ -184,7 +184,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                 }
               >
                 <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1 capitalize">
                         {restaurant.restaurant}
@@ -203,14 +203,14 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap">
                     {/* <Badge variant="outline" className="text-xs">
                       {restaurant.cuisine}
                     </Badge> */}
                     {/* <Badge variant="outline" className="text-xs capitalize">
                       {restaurant.serviceStyle.replace("_", " ")}
                     </Badge> */}
-                    <Badge variant="default" className="text-xs capitalize">
+                    <Badge variant="secondary" className="text-xs capitalize">
                       {restaurant.tip_structure == "individual"
                         ? "Individual Tips"
                         : "Tip Pool"}
@@ -223,7 +223,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-sm text-gray-600 mb-1">
+                          <p className="text-sm text-gray-600">
                             Latest tip submission
                           </p>
                           <p className="font-semibold text-lg">
