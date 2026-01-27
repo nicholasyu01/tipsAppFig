@@ -136,9 +136,9 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
           <CardTitle className="text-2xl font-bold">
             {mode === "signin" ? "Sign in" : "Create an account"}
           </CardTitle>
-          <CardDescription>
+          {/* <CardDescription>
             Access TipTransparency to submit and compare earnings.
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
 
         <CardContent>
@@ -162,18 +162,6 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
               Sign up
             </Button>
           </div>
-
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {message && !error && (
-            <Alert className="mb-4">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {mode === "signup" && (
@@ -224,6 +212,18 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 />
               </div>
             </div>
+
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {message && !error && (
+              <Alert variant="positive" className="mb-4">
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            )}
 
             {mode === "signin" && (
               <div className="flex justify-end">

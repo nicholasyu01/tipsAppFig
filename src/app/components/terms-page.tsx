@@ -74,11 +74,8 @@ export default function TermsPage() {
         <h2 className="text-xl font-semibold mt-6 mb-2">9. Contact</h2>
         <p className="mb-6">
           Email us at{" "}
-          <a
-            href="mailto:email.cashout.app@gmail.com"
-            className="text-blue-600"
-          >
-            email.cashout.app@gmail.com
+          <a href="mailto:admin@cashouttips.ca" className="text-blue-600">
+            admin@cashouttips.ca
           </a>{" "}
           for questions.
         </p>
