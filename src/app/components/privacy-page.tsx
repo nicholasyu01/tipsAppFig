@@ -75,11 +75,8 @@ export default function PrivacyPage() {
         <h2 className="text-xl font-semibold mt-6 mb-2">6. Contact</h2>
         <p className="mb-6">
           If you have questions or complaints, email us at{" "}
-          <a
-            href="mailto:email.cashout.app@gmail.com"
-            className="text-blue-600"
-          >
-            email.cashout.app@gmail.com
+          <a href="mailto:admin@cashouttips.ca" className="text-blue-600">
+            admin@cashouttips.ca
           </a>
           .
         </p>
