@@ -32,6 +32,7 @@ interface AuthPageProps {
 export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,12 +44,19 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
     setMessage(null);
     setIsLoading(true);
 
-    const authAction =
-      mode === "signin"
-        ? supabase.auth.signInWithPassword({ email, password })
-        : supabase.auth.signUp({ email, password });
+    let result;
+    if (mode === "signin") {
+      result = await supabase.auth.signInWithPassword({ email, password });
+    } else {
+      // pass name in user metadata when signing up
+      result = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: name } },
+      });
+    }
 
-    const { error: authError, data } = await authAction;
+    const { error: authError, data } = result;
 
     if (authError) {
       setError(authError.message);
@@ -86,9 +94,6 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
           redirectTo: window.location.origin + "/reset-password",
         });
 
-      // Log full response for debugging (will appear in browser console)
-      console.log("resetPasswordForEmail response:", resetData, resetError);
-
       if (resetError) {
         // 500 errors can indicate SMTP or project config problems. Surface code if available.
         const code = (resetError as any)?.status ?? (resetError as any)?.code;
@@ -125,15 +130,15 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+    <div className="h-9/10 bg-gray-50 flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">
             {mode === "signin" ? "Sign in" : "Create an account"}
           </CardTitle>
-          <CardDescription>
+          {/* <CardDescription>
             Access TipTransparency to submit and compare earnings.
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
 
         <CardContent>
@@ -158,19 +163,24 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
             </Button>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {message && !error && (
-            <Alert className="mb-4">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
-
           <form className="space-y-4" onSubmit={handleSubmit}>
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <div className="relative">
+                  <Mail className="size-4 absolute left-3 top-3 text-gray-400" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10"
+                    required={mode === "signup"}
+                  />
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -202,6 +212,18 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 />
               </div>
             </div>
+
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {message && !error && (
+              <Alert variant="positive" className="mb-4">
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            )}
 
             {mode === "signin" && (
               <div className="flex justify-end">

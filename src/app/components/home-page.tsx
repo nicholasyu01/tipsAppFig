@@ -12,12 +12,14 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { getStatsForRestaurant, type Restaurant } from "@/data/mockData";
 import { supabase } from "@/app/lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 interface HomePageProps {
   onSelectRestaurant: (restaurantId: string, address?: string) => void;
 }
 
 export function HomePage({ onSelectRestaurant }: HomePageProps) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
@@ -37,7 +39,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
       setLoadingRestaurants(true);
       try {
         const { data, error } = await supabase
-          .from("latest_restaurant_tips")
+          .from("average_restaurant_tips")
           .select("*");
 
         if (error) {
@@ -61,7 +63,6 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
       if (s.restaurant !== restaurant) return false;
       return true;
     });
-    console.log("Stats for restaurant", restaurant, list);
     return list;
   };
   const getTopEarningForRestaurant = (restaurant: Restaurant) => {
@@ -178,14 +179,14 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
 
             return (
               <Card
-                key={restaurant.id}
+                key={restaurant.address}
                 className="hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() =>
                   onSelectRestaurant(restaurant.restaurant, restaurant.address)
                 }
               >
                 <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1 capitalize">
                         {restaurant.restaurant}
@@ -204,14 +205,14 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap">
                     {/* <Badge variant="outline" className="text-xs">
                       {restaurant.cuisine}
                     </Badge> */}
                     {/* <Badge variant="outline" className="text-xs capitalize">
                       {restaurant.serviceStyle.replace("_", " ")}
                     </Badge> */}
-                    <Badge variant="default" className="text-xs capitalize">
+                    <Badge variant="secondary" className="text-xs capitalize">
                       {restaurant.tip_structure == "individual"
                         ? "Individual Tips"
                         : "Tip Pool"}
@@ -224,11 +225,13 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-sm text-gray-600 mb-1">
-                            Latest tip submission
+                          <p className="text-sm text-gray-600">
+                            Average Tips per Shift
                           </p>
                           <p className="font-semibold text-lg">
-                            {restaurant.tip_amount}
+                            {restaurant.avg_tip_per_shift
+                              ? `$${restaurant.avg_tip_per_shift.toFixed(0)}`
+                              : "N/A"}
                           </p>
                         </div>
                         {/* <TrendingUp className="size-5 text-green-600" /> */}
@@ -258,6 +261,48 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               </Card>
             );
           })}
+          <Card
+            key={"submitNewId"}
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-xl mb-1 capitalize">
+                    {"Submit New Restaurant"}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1">
+                    {/* <MapPin className="size-4" />
+                        {restaurant.address
+                          ? restaurant.address
+                              .split(",")
+                              .slice(0, 2)
+                              .map((s) => s.trim())
+                              .join(", ")
+                          : (restaurant.city ?? "")} */}
+                  </CardDescription>
+                </div>
+                {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
+              </div>
+
+              <div className="flex flex-wrap"></div>
+            </CardHeader>
+
+            <CardContent>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-3">
+                  No data yet
+                </p>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => navigate("/submit")}
+                >
+                  Be the first to submit
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {filteredRestaurants.length === 0 && !loadingRestaurants && (

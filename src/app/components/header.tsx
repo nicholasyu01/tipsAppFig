@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   MessageSquareHeart,
+  Image,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -130,18 +131,6 @@ function MobileMenu({
               </div>
             </button>
 
-            <button
-              className={`text-left px-4 py-2 hover:bg-gray-50 ${
-                activeView === "feedback" ? "bg-gray-100 font-semibold" : ""
-              }`}
-              onClick={() => handleNavigate("feedback")}
-            >
-              <div className="flex items-center gap-2">
-                <MessageSquareHeart className="size-4" />
-                <span>Feedback</span>
-              </div>
-            </button>
-
             <div className="border-t mt-1" />
 
             {isAuthenticated ? (
@@ -209,15 +198,18 @@ export function Header({
 
   const activeView = getActiveView(location.pathname);
   return (
-    <header className="border-b bg-white sticky top-1 z-50">
+    <header className="border-b bg-white sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <button
             onClick={() => onNavigate("home")}
-            className="flex items-center gap-2 text-xl font-semibold hover:opacity-80 transition-opacity"
+            className="flex items-center text-xl font-semibold hover:opacity-100 transition-opacity"
           >
+            <img src="/cashout-logo2.png" alt="Ca$hOut" className="h-12 w-12" />
+            <img src="/cashout-logo3.png" alt="Ca$hOut" className="" />
+
             {/* <DollarSign className="size-6 text-green-600" /> */}
-            <span>Ca$hOut</span>
+            {/* <span>Ca$hOut</span> */}
           </button>
 
           <div className="flex items-center gap-3">
@@ -286,13 +278,6 @@ export function Header({
                   </Button>
                 )}
               </div>
-              <Button
-                variant={activeView === "feedback" ? "default" : "ghost"}
-                onClick={() => navigate("/feedback")}
-                className="gap-2"
-              >
-                <MessageSquareHeart className="size-4" />
-              </Button>
             </nav>
             {/* Mobile hamburger menu */}
             <div className="sm:hidden relative">

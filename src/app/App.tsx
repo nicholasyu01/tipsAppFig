@@ -15,6 +15,11 @@ import { ComparePage } from "@/app/components/compare-page";
 import { AuthPage } from "@/app/components/auth-page";
 import ResetPasswordPage from "@/app/components/reset-password-page";
 import LeaveFeedbackPage from "@/app/components/leave-feedback-page";
+import PrivacyPage from "@/app/components/privacy-page";
+import TermsPage from "@/app/components/terms-page";
+import CookieBanner from "@/app/components/cookie-banner";
+import FooterLegal from "@/app/components/footer-legal";
+import ProtectedRoute from "@/app/components/protected-route";
 import { Toaster } from "@/app/components/ui/sonner";
 import { supabase } from "@/app/lib/supabaseClient";
 import { UserProvider, useUser } from "@/app/lib/userContext";
@@ -27,7 +32,7 @@ type View =
   | "submit"
   | "compare"
   | "auth"
-  | "leave-feedback"
+  | "feedback"
   | "my-submissions";
 
 const viewToPath = (view: View) => {
@@ -42,15 +47,15 @@ const viewToPath = (view: View) => {
       return "/compare";
     case "auth":
       return "/auth";
-    case "leave-feedback":
-      return "/leave-feedack";
+    case "feedback":
+      return "/feedack";
     case "my-submissions":
       return "/my-submissions";
     default:
       return "/";
   }
 };
-const protectedViews: View[] = ["submit", "my-submissions", "leave-feedback"];
+const protectedViews: View[] = ["submit", "my-submissions"];
 
 export default function App() {
   return (
@@ -64,11 +69,10 @@ export default function App() {
 
 function InnerApp() {
   const navigate = useNavigate();
-  const [session, setSession] = useState<Session | null>(null);
   const [pendingView, setPendingView] = useState<View | null>(null);
   const [userSubmissions, setUserSubmissions] =
     useState<ShiftSubmission[]>(mockShiftSubmissions);
-  const { setUser } = useUser();
+  const { user, initializing } = useUser();
   const [restaurantAddress, setRestaurantAddress] = useState<
     string | undefined
   >(undefined);
@@ -92,41 +96,14 @@ function InnerApp() {
     }
   }, [userSubmissions]);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session ?? null);
-      // synchronize global user context
-      setUser(
-        data.session && data.session.user
-          ? {
-              email: data.session.user.email ?? null,
-              id: data.session.user.id ?? null,
-            }
-          : null,
-      );
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event: any, authSession: any) => {
-        setSession(authSession ?? null);
-        setUser(
-          authSession && authSession.user
-            ? {
-                email: authSession.user.email ?? null,
-                id: authSession.user.id ?? null,
-              }
-            : null,
-        );
-      },
-    );
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
-
   const handleNavigate = (view: View) => {
-    if (protectedViews.includes(view) && !session) {
+    // If auth state is still initializing, defer navigation until it's known
+    if (initializing) {
+      setPendingView(view);
+      return;
+    }
+
+    if (protectedViews.includes(view) && !user) {
       setPendingView(view);
       navigate("/auth");
       return;
@@ -134,6 +111,19 @@ function InnerApp() {
 
     navigate(viewToPath(view));
   };
+
+  useEffect(() => {
+    // If a navigation was deferred while auth initializing, perform it now
+    if (!initializing && pendingView) {
+      const v = pendingView;
+      setPendingView(null);
+      if (protectedViews.includes(v) && !user) {
+        navigate("/auth");
+      } else {
+        navigate(viewToPath(v));
+      }
+    }
+  }, [initializing, pendingView, user, navigate]);
 
   const handleSelectRestaurant = (id: string, address?: string) => {
     setRestaurantAddress(address ?? undefined);
@@ -162,11 +152,11 @@ function InnerApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full bg-gray-50">
       <Header
         currentView={"home"}
         onNavigate={handleNavigate}
-        isAuthenticated={!!session}
+        isAuthenticated={!!user}
         onAuthClick={() => handleNavigate("auth")}
         onSignOut={handleSignOut}
       />
@@ -187,7 +177,11 @@ function InnerApp() {
         />
         <Route
           path="/submit"
-          element={<SubmitPage onBack={() => navigate("/")} />}
+          element={
+            <ProtectedRoute>
+              <SubmitPage onBack={() => navigate("/")} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/compare"
@@ -198,19 +192,31 @@ function InnerApp() {
           element={<AuthPage onAuthSuccess={handleAuthSuccess} />}
         />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/feedback" element={<LeaveFeedbackPage />} />
+        <Route
+          path="/feedback"
+          element={
+            <ProtectedRoute>
+              <LeaveFeedbackPage onBack={() => navigate("/")} />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route
           path="/my-submissions"
           element={
-            <MySubmissionsPage
-              onBack={() => navigate("/")}
-              submissions={userSubmissions}
-              onDeleteSubmission={handleDeleteSubmission}
-            />
+            <ProtectedRoute>
+              <MySubmissionsPage
+                onBack={() => navigate("/")}
+                submissions={userSubmissions}
+                onDeleteSubmission={handleDeleteSubmission}
+              />
+            </ProtectedRoute>
           }
         />
       </Routes>
-
+      <CookieBanner />
+      <FooterLegal />
       <Toaster />
     </div>
   );
@@ -224,7 +230,6 @@ function RestaurantWrapper({
   onBack: () => void;
 }) {
   const { id, address } = useParams();
-  console.log("RestaurantWrapper params:", { id, address });
   if (!id && !address) return null;
   return (
     <RestaurantDetailPage
