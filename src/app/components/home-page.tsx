@@ -61,7 +61,6 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
       if (s.restaurant !== restaurant) return false;
       return true;
     });
-    console.log("Stats for restaurant", restaurant, list);
     return list;
   };
   const getTopEarningForRestaurant = (restaurant: Restaurant) => {
