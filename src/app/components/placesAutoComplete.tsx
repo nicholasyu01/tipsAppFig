@@ -13,28 +13,15 @@ export default function PlacesAutocomplete({
 }: PlacesAutocompleteProps) {
   const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<Place[]>([]);
+  const [selected, setSelected] = useState<Place | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      const target = e.target as Node | null;
-      if (
-        containerRef.current &&
-        target &&
-        !containerRef.current.contains(target)
-      ) {
-        setResults([]);
-      }
-    }
+    setSelected(null);
 
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
-  }, []);
-
-  useEffect(() => {
     if (!query || query.trim().length < 2) {
       setResults([]);
       setError(null);
@@ -45,7 +32,7 @@ export default function PlacesAutocomplete({
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       search(query.trim());
-    }, 300);
+    }, 60);
 
     return () => {
       if (timer.current) {
@@ -61,6 +48,7 @@ export default function PlacesAutocomplete({
       setError("Missing Google Maps API key");
       return;
     }
+    if (selected) return;
 
     setLoading(true);
     setError(null);
@@ -110,6 +98,7 @@ export default function PlacesAutocomplete({
     // set input to chosen display name or formatted address (coerce objects)
     const label = getLabelFromPlace(place);
     setQuery(label);
+    setSelected(place);
     setResults([]);
   }
 

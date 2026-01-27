@@ -37,7 +37,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
       setLoadingRestaurants(true);
       try {
         const { data, error } = await supabase
-          .from("latest_restaurant_tips")
+          .from("average_restaurant_tips")
           .select("*");
 
         if (error) {
@@ -177,7 +177,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
 
             return (
               <Card
-                key={restaurant.id}
+                key={restaurant.address}
                 className="hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() =>
                   onSelectRestaurant(restaurant.restaurant, restaurant.address)
@@ -224,10 +224,12 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
                           <p className="text-sm text-gray-600">
-                            Latest tip submission
+                            Average Tips per Shift
                           </p>
                           <p className="font-semibold text-lg">
-                            {restaurant.tip_amount}
+                            {restaurant.avg_tip_per_shift
+                              ? `$${restaurant.avg_tip_per_shift.toFixed(0)}`
+                              : "N/A"}
                           </p>
                         </div>
                         {/* <TrendingUp className="size-5 text-green-600" /> */}

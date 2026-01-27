@@ -54,6 +54,7 @@ import {
 } from "recharts";
 import { supabase } from "../lib/supabaseClient";
 import { useUser } from "@/app/lib/userContext";
+import { useNavigate } from "react-router-dom";
 
 interface MySubmissionsPageProps {
   onBack: () => void;
@@ -68,6 +69,7 @@ export function MySubmissionsPage({
   submissions,
   onDeleteSubmission,
 }: MySubmissionsPageProps) {
+  const navigate = useNavigate();
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterShift, setFilterShift] = useState<string>("all");
   const [filterRestaurant, setFilterRestaurant] = useState<string>("all");
@@ -92,12 +94,18 @@ export function MySubmissionsPage({
     new Set(restaurants.map((r) => `${r.restaurant} — ${r.address}`)),
   ).sort((a, b) => a.localeCompare(b));
 
+  // Redirect non-signed-in users to /auth automatically
+  useEffect(() => {
+    if (user === null) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
   // Filter and sort submissions
   const filteredSubmissions = restaurants
     .filter((sub) => {
       if (
         filterRestaurant !== "all" &&
-        sub.restaurant !== filterRestaurant.split &&
+        sub.restaurant !== filterRestaurant.split("-")[0] &&
         sub.address !== filterRestaurant.split("—")[1].trim()
       )
         return false;
@@ -238,7 +246,13 @@ export function MySubmissionsPage({
                 Start by submitting your first shift earnings to track your
                 income over time
               </p>
-              <Button onClick={onBack}>Submit Your First Shift</Button>
+              <Button
+                onClick={() => {
+                  navigate("/submit");
+                }}
+              >
+                Submit Your First Shift
+              </Button>
             </CardContent>
           </Card>
         ) : (
