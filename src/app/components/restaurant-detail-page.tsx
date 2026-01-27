@@ -93,73 +93,55 @@ export function RestaurantDetailPage({
     });
   };
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    if (!restaurantId || !restaurantAddress) return;
+
+    const fetchRestaurantTips = async () => {
       setLoadingRestaurants(true);
+
       try {
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `created_at, date, id, name, restaurant, address, role, start_time, tip_amount, tip_structure, shifts, hours`,
-          );
+            `
+          created_at,
+          date,
+          id,
+          restaurant,
+          address,
+          role,
+          start_time,
+          tip_amount,
+          tip_structure,
+          shifts,
+          hours
+        `,
+          )
+          .eq("restaurant", restaurantId)
+          .eq("address", restaurantAddress)
+          .order("created_at", { ascending: false });
 
         if (error) {
-          console.error("Error fetching restaurants:", error);
+          console.error("Error fetching restaurant tips:", error);
           setRestaurants([]);
           return;
         }
 
-        const rows = (data ?? []) as any[];
-        const map = new Map<string, Restaurant>();
+        const rows = data ?? [];
 
-        rows.forEach((r) => {
-          const id = r.id;
-          if (!id) return;
+        setRestaurants(rows);
 
-          if (!map.has(String(id))) {
-            map.set(String(id), {
-              id: String(id),
-              name: r.restaurant,
-              city: r.city ?? "Vancouver",
-              state: r.state ?? "BC",
-              cuisine: r.cuisine ?? "",
-              priceRange: (r.price_range ?? r.priceRange ?? "$") as any,
-              serviceStyle: (r.service_style ??
-                r.serviceStyle ??
-                "casual") as any,
-              tipModel: (r.tip_structure ??
-                r.tip_structure ??
-                "individual") as any,
-              poolDistribution: "",
-              creditCardFeeDeduction: Boolean(false),
-            });
-          }
-        });
+        // representative restaurant record (latest)
+        setRestaurant(rows[0] ?? null);
 
-        setRestaurants(data);
-        console.log("fetched restaurants data:", restaurantAddress);
-        const selectedRest = data.find(
-          (r) =>
-            r.restaurant === restaurantId && r.address === restaurantAddress,
+        // all stats are already scoped correctly
+        setAllStats(rows);
+
+        // unique roles
+        const roles = Array.from(
+          new Set(rows.map((r) => r.role?.toLowerCase()).filter(Boolean)),
         );
-        console.log("selectedRest", selectedRest);
-        setRestaurant(selectedRest);
-        const allStats = data.filter(
-          (item) =>
-            item.restaurant.toLowerCase() === restaurantId.toLowerCase() &&
-            item.address === restaurantAddress,
-        );
-        setAllStats(allStats);
-        console.log("allStats", allStats);
-        // console.log("allStats", JSON.stringify(allStats));
 
-        // calculate aggregate data
-
-        const availableRoles = Array.from(
-          new Set(allStats.map((s) => s.role.toLowerCase())),
-        );
-        console.log("availableRoles", availableRoles);
-
-        setAvailableRoles(availableRoles);
+        setAvailableRoles(roles);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -168,8 +150,9 @@ export function RestaurantDetailPage({
       }
     };
 
-    fetchRestaurants();
-  }, []);
+    fetchRestaurantTips();
+  }, [restaurantId, restaurantAddress]);
+
   if (!restaurant) {
     return (
       <div className="container mx-auto px-4 py-8">
