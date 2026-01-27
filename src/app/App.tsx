@@ -235,7 +235,6 @@ function RestaurantWrapper({
   onBack: () => void;
 }) {
   const { id, address } = useParams();
-  console.log("RestaurantWrapper params:", { id, address });
   if (!id && !address) return null;
   return (
     <RestaurantDetailPage
