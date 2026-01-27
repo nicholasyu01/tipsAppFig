@@ -32,6 +32,7 @@ interface AuthPageProps {
 export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,12 +44,19 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
     setMessage(null);
     setIsLoading(true);
 
-    const authAction =
-      mode === "signin"
-        ? supabase.auth.signInWithPassword({ email, password })
-        : supabase.auth.signUp({ email, password });
+    let result;
+    if (mode === "signin") {
+      result = await supabase.auth.signInWithPassword({ email, password });
+    } else {
+      // pass name in user metadata when signing up
+      result = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: name } },
+      });
+    }
 
-    const { error: authError, data } = await authAction;
+    const { error: authError, data } = result;
 
     if (authError) {
       setError(authError.message);
@@ -168,6 +176,23 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <div className="relative">
+                  <Mail className="size-4 absolute left-3 top-3 text-gray-400" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10"
+                    required={mode === "signup"}
+                  />
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
