@@ -37,7 +37,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
       setLoadingRestaurants(true);
       try {
         const { data, error } = await supabase
-          .from("latest_restaurant_tips")
+          .from("average_restaurant_tips")
           .select("*");
 
         if (error) {
@@ -61,7 +61,6 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
       if (s.restaurant !== restaurant) return false;
       return true;
     });
-    console.log("Stats for restaurant", restaurant, list);
     return list;
   };
   const getTopEarningForRestaurant = (restaurant: Restaurant) => {
@@ -178,14 +177,14 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
 
             return (
               <Card
-                key={restaurant.id}
+                key={restaurant.address}
                 className="hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() =>
                   onSelectRestaurant(restaurant.restaurant, restaurant.address)
                 }
               >
                 <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1 capitalize">
                         {restaurant.restaurant}
@@ -204,14 +203,14 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap">
                     {/* <Badge variant="outline" className="text-xs">
                       {restaurant.cuisine}
                     </Badge> */}
                     {/* <Badge variant="outline" className="text-xs capitalize">
                       {restaurant.serviceStyle.replace("_", " ")}
                     </Badge> */}
-                    <Badge variant="default" className="text-xs capitalize">
+                    <Badge variant="secondary" className="text-xs capitalize">
                       {restaurant.tip_structure == "individual"
                         ? "Individual Tips"
                         : "Tip Pool"}
@@ -224,11 +223,13 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-sm text-gray-600 mb-1">
-                            Latest tip submission
+                          <p className="text-sm text-gray-600">
+                            Average Tips per Shift
                           </p>
                           <p className="font-semibold text-lg">
-                            {restaurant.tip_amount}
+                            {restaurant.avg_tip_per_shift
+                              ? `$${restaurant.avg_tip_per_shift.toFixed(0)}`
+                              : "N/A"}
                           </p>
                         </div>
                         {/* <TrendingUp className="size-5 text-green-600" /> */}
