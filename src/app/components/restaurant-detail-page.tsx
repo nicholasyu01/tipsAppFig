@@ -271,7 +271,7 @@ export function RestaurantDetailPage({
             {/* <Badge variant="outline" className="capitalize">
               {restaurant.serviceStyle.replace("_", " ")}
             </Badge> */}
-            <Badge variant="default" className="text-xs capitalize">
+            <Badge variant="secondary" className="text-xs capitalize">
               {restaurant.tip_structure === "pool" && "Tip Pool"}
               {restaurant.tip_structure === "individual" && "Individual Tips"}
             </Badge>
