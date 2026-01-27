@@ -13,6 +13,7 @@ export type Role =
   | "bartender"
   | "barback"
   | "host"
+  | "expediter"
   | "server_assistant"
   | "manager"
   | "bottle_service"
@@ -516,6 +517,7 @@ export const roleLabels: Record<Role, string> = {
   bartender: "Bartender",
   barback: "Barback",
   host: "Host",
+  expediter: "Expediter",
   server_assistant: "Server Assistant",
   bottle_service: "Bottle Service",
   manager: "Manager",

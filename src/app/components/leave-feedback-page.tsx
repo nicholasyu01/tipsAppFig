@@ -26,6 +26,13 @@ export default function LeaveFeedbackPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [thanksOpen, setThanksOpen] = useState(false);
 
+  // Redirect non-signed-in users to /auth automatically
+  useEffect(() => {
+    if (user === null) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
+
   const validate = () => {
     if (!user?.email) {
       setError("You must be signed in to leave feedback.");
@@ -74,7 +81,6 @@ export default function LeaveFeedbackPage() {
       setSubmitting(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <Card className="max-w-2xl w-full">
