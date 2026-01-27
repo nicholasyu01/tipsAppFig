@@ -99,7 +99,7 @@ export function RestaurantDetailPage({
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
+            `created_at, date, id, name, restaurant, address, role, start_time, tip_amount, tip_structure, shifts, hours`,
           );
 
         if (error) {
@@ -126,8 +126,8 @@ export function RestaurantDetailPage({
               serviceStyle: (r.service_style ??
                 r.serviceStyle ??
                 "casual") as any,
-              tipModel: (r.tipStructure ??
-                r.tipStructure ??
+              tipModel: (r.tip_structure ??
+                r.tip_structure ??
                 "individual") as any,
               poolDistribution: "",
               creditCardFeeDeduction: Boolean(false),
@@ -197,8 +197,8 @@ export function RestaurantDetailPage({
     {
       id: 1,
       averageTips:
-        filteredStats.reduce((sum, s) => sum + s.tipAmount, 0) /
-        filteredStats.reduce((sum, s) => sum + s.shiftsWorked, 0),
+        filteredStats.reduce((sum, s) => sum + s.tip_amount, 0) /
+        filteredStats.reduce((sum, s) => sum + s.shifts, 0),
     },
   ];
 
@@ -291,8 +291,8 @@ export function RestaurantDetailPage({
               {restaurant.serviceStyle.replace("_", " ")}
             </Badge> */}
             <Badge variant="default" className="text-xs capitalize">
-              {restaurant.tipStructure === "pool" && "Tip Pool"}
-              {restaurant.tipStructure === "individual" && "Individual Tips"}
+              {restaurant.tip_structure === "pool" && "Tip Pool"}
+              {restaurant.tip_structure === "individual" && "Individual Tips"}
             </Badge>
             {/* {restaurant.poolDistribution && (
               <Badge variant="outline" className="capitalize">
@@ -409,10 +409,7 @@ export function RestaurantDetailPage({
                       </div> */}
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>
-                          {filteredStats.reduce(
-                            (sum, s) => sum + s.shiftsWorked,
-                            0,
-                          )}{" "}
+                          {filteredStats.reduce((sum, s) => sum + s.shifts, 0)}{" "}
                           shifts submitted
                         </span>
                       </div>
@@ -468,17 +465,17 @@ export function RestaurantDetailPage({
                               {new Date(stat.date).toLocaleDateString()}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
-                              ${stat.tipAmount}
+                              ${stat.tip_amount}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
-                              {stat.shiftsWorked}
+                              {stat.shifts}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
                               {stat.hours}
                             </td>
                             <td className="text-right py-3 px-2 font-medium">
                               {(() => {
-                                const t = stat.shiftStartTime;
+                                const t = stat.start_time;
                                 if (!t) return null;
 
                                 // Try parsing as full date/time first

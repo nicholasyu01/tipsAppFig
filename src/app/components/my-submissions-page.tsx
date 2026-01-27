@@ -70,6 +70,7 @@ export function MySubmissionsPage({
 }: MySubmissionsPageProps) {
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterShift, setFilterShift] = useState<string>("all");
+  const [filterRestaurant, setFilterRestaurant] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [submissionToDelete, setSubmissionToDelete] = useState<string | null>(
@@ -86,10 +87,20 @@ export function MySubmissionsPage({
   const uniqueShifts = Array.from(
     new Set(submissions.map((s) => s.shiftTimeOfDay)),
   );
+  // Build unique restaurant list by both name + address (so same name at different locations are distinct)
+  const uniqueRestaurants = Array.from(
+    new Set(restaurants.map((r) => `${r.restaurant} — ${r.address}`)),
+  ).sort((a, b) => a.localeCompare(b));
 
   // Filter and sort submissions
   const filteredSubmissions = restaurants
     .filter((sub) => {
+      if (
+        filterRestaurant !== "all" &&
+        sub.restaurant !== filterRestaurant.split &&
+        sub.address !== filterRestaurant.split("—")[1].trim()
+      )
+        return false;
       if (filterRole !== "all" && sub.role !== filterRole) return false;
 
       return true;
@@ -101,23 +112,23 @@ export function MySubmissionsPage({
         case "date-asc":
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         case "earnings-desc":
-          return b.tipAmount - a.tipAmount;
+          return b.tip_amount - a.tip_amount;
         case "earnings-asc":
-          return a.tipAmount - b.tipAmount;
+          return a.tip_amount - b.tip_amount;
         default:
           return 0;
       }
     });
 
   const totalEarnings = filteredSubmissions.reduce(
-    (sum, s) => sum + s.tipAmount,
+    (sum, s) => sum + s.tip_amount,
     0,
   );
 
   const avgTipsPerShift =
     filteredSubmissions.length > 0
       ? totalEarnings /
-        filteredSubmissions.reduce((sum, s) => sum + s.shiftsWorked, 0)
+        filteredSubmissions.reduce((sum, s) => sum + s.shifts, 0)
       : 0;
 
   // Calculate summary stats
@@ -164,9 +175,7 @@ export function MySubmissionsPage({
       setSubmissionToDelete(null);
     }
   };
-
   useEffect(() => {
-    // Wait for user to be available before fetching user-specific submissions
     if (!user?.email) {
       setLoadingRestaurants(false);
       setRestaurants([]);
@@ -175,12 +184,14 @@ export function MySubmissionsPage({
 
     const fetchRestaurants = async () => {
       setLoadingRestaurants(true);
+
       try {
         const { data, error } = await supabase
           .from("tips")
           .select(
-            `createdAt, date, id, name, restaurant, address, role, shiftStartTime, tipAmount, tipStructure, shiftsWorked, hours`,
-          );
+            "created_at, date, id, name, restaurant, address, role, start_time, tip_amount, tip_structure, shifts, hours",
+          )
+          .eq("name", user.email); // 👈 filter in SQL
 
         if (error) {
           console.error("Error fetching restaurants:", error);
@@ -188,40 +199,7 @@ export function MySubmissionsPage({
           return;
         }
 
-        const rows = (data ?? []) as any[];
-
-        // Try matching against multiple possible fields that might contain the submitter's email
-        const myRows = rows.filter((r) => {
-          const submitter = (r.name ?? r.user_email ?? r.email ?? "") as string;
-          return submitter === user.email;
-        });
-
-        // Map raw rows to the Restaurant shape if possible, otherwise store empty array
-        const map = new Map<string, Restaurant>();
-        myRows.forEach((r) => {
-          const rid = r.id;
-          if (!rid) return;
-          if (!map.has(String(rid))) {
-            map.set(String(rid), {
-              id: String(rid),
-              name: r.restaurant ?? r.name ?? "",
-              city: r.city ?? "Vancouver",
-              state: r.state ?? "BC",
-              cuisine: r.cuisine ?? "",
-              priceRange: (r.price_range ?? r.priceRange ?? "$") as any,
-              serviceStyle: (r.service_style ??
-                r.serviceStyle ??
-                "casual") as any,
-              tipModel: (r.tipStructure ??
-                r.tipStructure ??
-                "individual") as any,
-              poolDistribution: "",
-              creditCardFeeDeduction: Boolean(false),
-            });
-          }
-        });
-
-        setRestaurants(myRows);
+        setRestaurants(data ?? []);
       } catch (err) {
         console.error(err);
         setRestaurants([]);
@@ -231,7 +209,7 @@ export function MySubmissionsPage({
     };
 
     fetchRestaurants();
-  }, [user]);
+  }, [user?.email]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -243,10 +221,10 @@ export function MySubmissionsPage({
             Back
           </Button>
           <h1 className="text-3xl font-bold mb-2">My History</h1>
-          <p className="text-muted-foreground">
+          {/* <p className="text-muted-foreground">
             Track all your shift earnings submissions and view your personal
             statistics
-          </p>
+          </p> */}
         </div>
       </div>
 
@@ -323,10 +301,7 @@ export function MySubmissionsPage({
                     Total Shifts
                   </CardDescription>
                   <CardTitle className="text-2xl">
-                    {filteredSubmissions.reduce(
-                      (sum, s) => sum + s.shiftsWorked,
-                      0,
-                    )}
+                    {filteredSubmissions.reduce((sum, s) => sum + s.shifts, 0)}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -404,6 +379,33 @@ export function MySubmissionsPage({
               <CardContent>
                 <div className="flex flex-wrap gap-4 mb-6">
                   <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium">Restaurant:</label>
+                    <Select
+                      value={filterRestaurant}
+                      onValueChange={(v: string) => setFilterRestaurant(v)}
+                    >
+                      <SelectTrigger className="w-[220px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Restaurants</SelectItem>
+                        {uniqueRestaurants.map((name) => (
+                          <SelectItem
+                            className="capitalize"
+                            key={name}
+                            value={name}
+                          >
+                            {name
+                              .split(",")
+                              .slice(0, 2)
+                              .map((s) => s.trim())
+                              .join(", ")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <label className="text-sm font-medium">Role:</label>
                     <Select value={filterRole} onValueChange={setFilterRole}>
                       <SelectTrigger className="w-[150px]">
@@ -441,7 +443,7 @@ export function MySubmissionsPage({
                     <label className="text-sm font-medium">Sort:</label>
                     <Select
                       value={sortBy}
-                      onValueChange={(v) => setSortBy(v as SortOption)}
+                      onValueChange={(v: string) => setSortBy(v as SortOption)}
                     >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue />
@@ -511,7 +513,7 @@ export function MySubmissionsPage({
                                     Tips
                                   </p>
                                   <p className="font-semibold text-green-600 text-lg">
-                                    ${submission.tipAmount}
+                                    ${submission.tip_amount}
                                   </p>
                                 </div>
 
@@ -520,7 +522,7 @@ export function MySubmissionsPage({
                                     Shifts Worked
                                   </p>
                                   <p className="font-medium">
-                                    {submission.shiftsWorked}
+                                    {submission.shifts}
                                   </p>
                                 </div>
                                 <div>
@@ -537,7 +539,7 @@ export function MySubmissionsPage({
                                   </p>
                                   <p className="font-medium">
                                     {(() => {
-                                      const t = submission.shiftStartTime;
+                                      const t = submission.start_time;
                                       if (!t) return null;
 
                                       // Try parsing as full date/time first
