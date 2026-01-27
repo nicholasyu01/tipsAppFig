@@ -44,7 +44,7 @@ interface ShiftFormData {
   restaurantId: string;
   role: Role;
   shiftTimeOfDay?: string;
-  shiftStartTime?: string;
+  start_time?: string;
   shiftType: ShiftType;
   date: string;
   baseWage: number;
@@ -68,16 +68,16 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     name: "",
     restaurant: "",
     address: "",
-    tipAmount: "",
+    tip_amount: "",
     role: "Server",
     date: "",
-    shiftStartTime: "",
-    tipStructure: "individual",
-    shiftsWorked: 1,
+    start_time: "",
+    tip_structure: "individual",
+    shifts: 1,
     hours: 8,
   });
 
-  const grossTips = Number(form.tipAmount) || Number(formData.grossTips) || 0;
+  const grossTips = Number(form.tip_amount) || Number(formData.grossTips) || 0;
   const tipOutAmount = Number(formData.tipOutAmount) || 0;
   const totalSales = Number(formData.totalSales) || 0;
   const hoursWorked = Number(formData.hoursWorked) || 0;
@@ -96,11 +96,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
   function validate() {
     // if (!form.name.trim()) return "Name is required";
     if (!form.restaurant.trim()) return "Restaurant is required";
-    if (!form.tipAmount || Number.isNaN(Number(form.tipAmount)))
+    if (!form.tip_amount || Number.isNaN(Number(form.tip_amount)))
       return "Valid tip amount is required";
     if (!form.role) return "Role is required";
     if (!form.date) return "Date is required";
-    // if (!form.shiftStartTime) return "Shift start time is required";
+    // if (!form.start_time) return "Shift start time is required";
     return null;
   }
 
@@ -138,13 +138,13 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       name: user?.email ?? null,
       restaurant: (restaurantName ?? "").trim(),
       address: form.address || "",
-      tipAmount: Number(form.tipAmount),
+      tip_amount: Number(form.tip_amount),
       role: form.role,
       date: form.date,
-      shiftStartTime: "00:00", // form.shiftStartTime
-      tipStructure: form.tipStructure,
-      createdAt: new Date().toISOString(),
-      shiftsWorked: Number(form.shiftsWorked),
+      start_time: "00:00", // form.start_time
+      tip_structure: form.tip_structure,
+      created_at: new Date().toISOString(),
+      shifts: Number(form.shifts),
       hours: Number(form.hours),
     };
     console.log("Submitting tip payload:", payload);
@@ -157,18 +157,18 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
         // Default local behavior: log to console. Replace with API call as needed.
         console.log("Tip submitted:", payload);
       }
-      setSubmittedTips(Number(form.tipAmount));
+      setSubmittedTips(Number(form.tip_amount));
       setMessage("Tip submitted successfully.");
       setForm({
         name: "",
         restaurant: "",
         address: "",
-        tipAmount: "",
+        tip_amount: "",
         role: "Server",
         date: "",
-        shiftStartTime: "",
-        tipStructure: "individual",
-        shiftsWorked: 1,
+        start_time: "",
+        tip_structure: "individual",
+        shifts: 1,
         hours: 8,
       });
       setCurrentStep("success");
@@ -272,14 +272,14 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
             <CardContent>
               <form className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="tipAmount">Tips ($) *</Label>
+                  <Label htmlFor="tip_amount">Tips ($) *</Label>
                   <Input
-                    id="tipAmount"
+                    id="tip_amount"
                     type="number"
                     step="0.01"
                     placeholder="00.00"
-                    value={form.tipAmount}
-                    onChange={update("tipAmount")}
+                    value={form.tip_amount}
+                    onChange={update("tip_amount")}
                   />
                   {/* <p className="text-xs text-muted-foreground">
                       Total tips before tip-out
@@ -326,14 +326,14 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="tipStructure">Tip Model *</Label>
+                  <Label htmlFor="tip_structure">Tip Model *</Label>
                   <Select
-                    defaultValue={form.tipStructure}
+                    defaultValue={form.tip_structure}
                     onValueChange={(value: string) =>
-                      setForm((s) => ({ ...s, tipStructure: value }))
+                      setForm((s) => ({ ...s, tip_structure: value }))
                     }
                   >
-                    <SelectTrigger id="tipStructure">
+                    <SelectTrigger id="tip_structure">
                       <SelectValue placeholder="Select Tip Model" />
                     </SelectTrigger>
                     <SelectContent>
@@ -379,14 +379,14 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="shiftsWorked">Shifts *</Label>
+                  <Label htmlFor="shifts">Shifts *</Label>
                   <Input
-                    id="shiftsWorked"
+                    id="shifts"
                     type="number"
                     step="1"
                     placeholder="Shifts Worked"
-                    value={form.shiftsWorked}
-                    onChange={update("shiftsWorked")}
+                    value={form.shifts}
+                    onChange={update("shifts")}
                   />
                 </div>
 
@@ -414,13 +414,13 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                     />
                   </div> */}
                 <div className="space-y-2">
-                  <Label htmlFor="shiftStartTime">Start Time *</Label>
+                  <Label htmlFor="start_time">Start Time *</Label>
                   <Input
-                    id="shiftStartTime"
+                    id="start_time"
                     type="time"
                     step={900}
-                    value={form.shiftStartTime}
-                    onChange={update("shiftStartTime")}
+                    value={form.start_time}
+                    onChange={update("start_time")}
                   />
                 </div>
 
@@ -560,7 +560,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                   className="w-full"
                   onClick={submitCashout}
                   disabled={
-                    !form.tipAmount ||
+                    !form.tip_amount ||
                     !form.restaurant ||
                     !form.role ||
                     !form.date
