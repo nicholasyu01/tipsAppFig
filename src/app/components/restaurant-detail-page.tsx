@@ -423,7 +423,7 @@ export function RestaurantDetailPage({
                             Tips
                           </th>
                           <th className="text-right py-3 px-2 font-medium">
-                            Shift(s)
+                            Shifts
                           </th>
                           <th className="text-right py-3 px-2 font-medium">
                             Hours
