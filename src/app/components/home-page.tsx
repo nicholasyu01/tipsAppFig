@@ -12,12 +12,14 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { getStatsForRestaurant, type Restaurant } from "@/data/mockData";
 import { supabase } from "@/app/lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 interface HomePageProps {
   onSelectRestaurant: (restaurantId: string, address?: string) => void;
 }
 
 export function HomePage({ onSelectRestaurant }: HomePageProps) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
@@ -259,6 +261,48 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               </Card>
             );
           })}
+          <Card
+            key={"submitNewId"}
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-xl mb-1 capitalize">
+                    {"Submit New Restaurant"}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1">
+                    {/* <MapPin className="size-4" />
+                        {restaurant.address
+                          ? restaurant.address
+                              .split(",")
+                              .slice(0, 2)
+                              .map((s) => s.trim())
+                              .join(", ")
+                          : (restaurant.city ?? "")} */}
+                  </CardDescription>
+                </div>
+                {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
+              </div>
+
+              <div className="flex flex-wrap"></div>
+            </CardHeader>
+
+            <CardContent>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-3">
+                  No data yet
+                </p>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => navigate("/submit")}
+                >
+                  Be the first to submit
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {filteredRestaurants.length === 0 && !loadingRestaurants && (

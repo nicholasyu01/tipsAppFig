@@ -130,7 +130,7 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+    <div className="h-9/10 bg-gray-50 flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">

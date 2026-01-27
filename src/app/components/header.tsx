@@ -131,18 +131,6 @@ function MobileMenu({
               </div>
             </button>
 
-            <button
-              className={`text-left px-4 py-2 hover:bg-gray-50 ${
-                activeView === "feedback" ? "bg-gray-100 font-semibold" : ""
-              }`}
-              onClick={() => handleNavigate("feedback")}
-            >
-              <div className="flex items-center gap-2">
-                <MessageSquareHeart className="size-4" />
-                <span>Feedback</span>
-              </div>
-            </button>
-
             <div className="border-t mt-1" />
 
             {isAuthenticated ? (
@@ -290,13 +278,6 @@ export function Header({
                   </Button>
                 )}
               </div>
-              <Button
-                variant={activeView === "feedback" ? "default" : "ghost"}
-                onClick={() => navigate("/feedback")}
-                className="gap-2"
-              >
-                <MessageSquareHeart className="size-4" />
-              </Button>
             </nav>
             {/* Mobile hamburger menu */}
             <div className="sm:hidden relative">
