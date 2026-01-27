@@ -109,7 +109,7 @@ export default function LeaveFeedbackPage() {
 
             <div className="flex gap-2">
               <Button type="submit" disabled={submitting} className="flex-1">
-                {submitting ? "Submitting..." : "Submit feedback"}
+                {submitting ? "Submitting..." : "Submit"}
               </Button>
               <Button
                 variant="ghost"
