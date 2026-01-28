@@ -349,11 +349,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       onChange={update("date")}
                       max={new Date().toISOString().split("T")[0]}
                       className={cn(
-                        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-50/100 min-w-0 rounded-md border px-3 py-1 text-sm bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+                        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 min-w-0 rounded-md border px-3 py-1 text-sm bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
                         // Responsive overrides
-                        "sm:text-base sm:px-3 sm:py-1 md:text-sm",
+                        "w-80/100 sm:w-full",
                       )}
                     />
                   </div>
@@ -392,11 +392,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                     value={form.start_time}
                     onChange={update("start_time")}
                     className={cn(
-                      "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-50/100 min-w-0 rounded-md border px-3 py-1 text-sm bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+                      "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 min-w-0 rounded-md border px-3 py-1 text-sm bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                       "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                       "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
                       // Responsive overrides
-                      "sm:text-base sm:px-3 sm:py-1 md:text-sm",
+                      "w-80/100 sm:w-full",
                     )}
                   />
                 </div>
