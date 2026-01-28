@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
-import { Search, TrendingUp, MapPin, DollarSign } from "lucide-react";
+import { useState, useMemo, useEffect, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, TrendingUp, MapPin, Share, DollarSign } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import {
   Card,
@@ -12,17 +13,17 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { getStatsForRestaurant, type Restaurant } from "@/data/mockData";
 import { supabase } from "@/app/lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
 
 interface HomePageProps {
   onSelectRestaurant: (restaurantId: string, address?: string) => void;
 }
 
 export function HomePage({ onSelectRestaurant }: HomePageProps) {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
+  const [copied, setCopied] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const filteredRestaurants = useMemo(() => {
     if (!searchQuery) return restaurants;
@@ -96,9 +97,44 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                 type="text"
                 placeholder="Search by restaurant name or address..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
                 className="pl-12 h-14 text-base bg-white text-gray-900"
               />
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const url = "https://cashouttips.ca";
+                  const message = `Ever wonder what servers/bartender actually make? ${url}`;
+                  const msg = `I’ve been using CashOut to track my tips and see what people actually make in hospitality 👀 Check it out: ${url}`;
+                  const msg1 = `Hey! Checkout CashOut — track your tips and see real hospitality earnings data. ${url}`;
+                  try {
+                    await navigator.clipboard.writeText(message);
+                    setCopied(true);
+                    window.setTimeout(() => setCopied(false), 3000);
+                  } catch (err) {
+                    // fallback: create temporary textarea
+                    const ta = document.createElement("textarea");
+                    ta.value = message;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try {
+                      document.execCommand("copy");
+                      setCopied(true);
+                      window.setTimeout(() => setCopied(false), 3000);
+                    } catch (e) {
+                      console.error("Copy failed", e);
+                    }
+                    document.body.removeChild(ta);
+                  }
+                }}
+              >
+                <Share className="size-4" />
+                {copied ? "Copied to clipboard!" : " Share with friends"}
+              </Button>
             </div>
           </div>
         </div>
@@ -197,7 +233,7 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                           ? restaurant.address
                               .split(",")
                               .slice(0, 2)
-                              .map((s) => s.trim())
+                              .map((s: string) => s.trim())
                               .join(", ")
                           : (restaurant.city ?? "")}
                       </CardDescription>

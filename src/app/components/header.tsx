@@ -113,7 +113,7 @@ function MobileMenu({
             >
               <div className="flex items-center gap-2">
                 <PlusCircle className="size-4" />
-                <span>Submit</span>
+                <span>Cashout</span>
               </div>
             </button>
 
