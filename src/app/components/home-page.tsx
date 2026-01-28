@@ -25,7 +25,6 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const [copied, setCopied] = useState<boolean>(false);
-  const navigate = useNavigate();
 
   const filteredRestaurants = useMemo(() => {
     if (!searchQuery) return restaurants;
