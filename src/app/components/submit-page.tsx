@@ -36,6 +36,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import PlacesAutocomplete from "./placesAutoComplete";
 import { useNavigate } from "react-router-dom";
+import { cn } from "./ui/utils";
 
 interface SubmitPageProps {
   onBack: () => void;
@@ -207,11 +208,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
             <div className="p-4 bg-green-50 rounded-lg">
               <p className="text-sm font-medium mb-2">Your earnings:</p>
               <p className="text-2xl font-bold text-green-700">
-                ${submittedTips.toFixed(0)}
+                ${submittedTips.toFixed(2)}
               </p>
-              <p className="text-sm text-muted-foreground">
+              {/* <p className="text-sm text-muted-foreground">
                 Net tips for this shift
-              </p>
+              </p> */}
             </div>
 
             {/* <Alert>
@@ -371,6 +372,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       type="date"
                       value={form.date}
                       onChange={update("date")}
+                      className={cn(
+                        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+                      )}
                       max={new Date().toISOString().split("T")[0]}
                     />
                   </div>
@@ -400,17 +406,6 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                   />
                 </div>
 
-                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
-                {/* <div className="space-y-2">
-                    <Label htmlFor="date">Date *</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={form.date}
-                      onChange={update("date")}
-                      max={new Date().toISOString().split("T")[0]}
-                    />
-                  </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="start_time">Start Time *</Label>
                   <Input
@@ -418,6 +413,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                     type="time"
                     step={900}
                     value={form.start_time}
+                    className={cn(
+                      "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                      "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                      "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+                    )}
                     onChange={update("start_time")}
                   />
                 </div>

@@ -63,7 +63,7 @@ export default function FooterLegal() {
             }}
           >
             <Share className="size-4" />
-            {copied ? "Copied to clipboard!" : " Share"}
+            {copied ? "Copied!" : " Share"}
           </Button>
         </div>
       </div>
