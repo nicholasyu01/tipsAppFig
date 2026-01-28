@@ -13,12 +13,14 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { getStatsForRestaurant, type Restaurant } from "@/data/mockData";
 import { supabase } from "@/app/lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 interface HomePageProps {
   onSelectRestaurant: (restaurantId: string, address?: string) => void;
 }
 
 export function HomePage({ onSelectRestaurant }: HomePageProps) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
