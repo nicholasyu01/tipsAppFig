@@ -26,16 +26,12 @@ export default function FooterLegal() {
           >
             Terms
           </Link>
-          <Button
-            variant={"ghost"}
-            onClick={() => navigate("/feedback")}
-            className="gap-2"
-          >
+          <Button variant={"ghost"} onClick={() => navigate("/feedback")}>
             <MessageSquareHeart className="size-4" />
             Feedback
           </Button>
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={async () => {
               const url = "https://cashouttips.ca";
               const message = `Ever wonder what servers/bartender actually make? ${url}`;
