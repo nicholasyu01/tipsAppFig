@@ -25,6 +25,7 @@ import { supabase } from "@/app/lib/supabaseClient";
 import { UserProvider, useUser } from "@/app/lib/userContext";
 import { MySubmissionsPage } from "./components/my-submissions-page";
 import { type ShiftSubmission, mockShiftSubmissions } from "@/data/mockData";
+import { Analytics } from "@vercel/analytics/react";
 
 type View =
   | "home"
@@ -214,6 +215,7 @@ function InnerApp() {
             </ProtectedRoute>
           }
         />
+        <Route path="/analytics" element={<Analytics />} />
       </Routes>
       <CookieBanner />
       <FooterLegal />
