@@ -353,7 +353,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
                         // Responsive overrides
-                        "w-80/100 sm:w-full",
+                        "w-50/100 sm:w-full",
                       )}
                     />
                   </div>
@@ -396,7 +396,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                       "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
                       // Responsive overrides
-                      "w-80/100 sm:w-full",
+                      "w-50/100 sm:w-full",
                     )}
                   />
                 </div>
