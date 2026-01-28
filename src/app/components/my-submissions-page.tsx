@@ -383,9 +383,9 @@ export function MySubmissionsPage({
                     <CardTitle>
                       All Submissions ({restaurants.length})
                     </CardTitle>
-                    <CardDescription>
+                    {/* <CardDescription>
                       View and manage your shift earnings
-                    </CardDescription>
+                    </CardDescription> */}
                   </div>
                   <Filter className="size-5 text-muted-foreground" />
                 </div>
