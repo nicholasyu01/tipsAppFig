@@ -1,10 +1,12 @@
-import React, { use } from "react";
+import React, { use, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/app/components/ui/button";
-import { MessageSquareHeart } from "lucide-react";
+import { MessageSquareHeart, Share } from "lucide-react";
 
 export default function FooterLegal() {
   const navigate = useNavigate();
+  const [copied, setCopied] = useState<boolean>(false);
+
   return (
     <footer className="border-t bg-white">
       <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between">
@@ -30,6 +32,38 @@ export default function FooterLegal() {
             className="gap-2"
           >
             <MessageSquareHeart className="size-4" />
+            Feedback
+          </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              const url = "https://cashouttips.ca";
+              const message = `Ever wonder what servers/bartender actually make? ${url}`;
+              const msg = `I’ve been using CashOut to track my tips and see what people actually make in hospitality 👀 Check it out: ${url}`;
+              const msg1 = `Hey! Checkout CashOut — track your tips and see real hospitality earnings data. ${url}`;
+              try {
+                await navigator.clipboard.writeText(msg);
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 3000);
+              } catch (err) {
+                // fallback: create temporary textarea
+                const ta = document.createElement("textarea");
+                ta.value = msg;
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                  document.execCommand("copy");
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 3000);
+                } catch (e) {
+                  console.error("Copy failed", e);
+                }
+                document.body.removeChild(ta);
+              }
+            }}
+          >
+            <Share className="size-4" />
+            {copied ? "Copied to clipboard!" : " Share"}
           </Button>
         </div>
       </div>
