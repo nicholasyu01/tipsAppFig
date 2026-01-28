@@ -3,6 +3,29 @@ import * as React from "react";
 import { cn } from "./utils";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  // allow callers to pass a style prop; we'll merge with our normalization styles
+  const { style: incomingStyle, ...rest } = props as any;
+
+  // apply small normalization for date/time inputs to avoid iOS internal field
+  // expanding past container width. These inline styles are deliberately
+  // conservative so they don't remove native picker behavior but help
+  // stabilize layout across browsers.
+  const dateTimeNormalize: React.CSSProperties | undefined =
+    type === "date" || type === "time" || type === "datetime-local"
+      ? {
+          WebkitAppearance: "textfield",
+          appearance: "textfield",
+          boxSizing: "border-box",
+          minWidth: 0,
+          overflow: "hidden",
+        }
+      : undefined;
+
+  const mergedStyle = {
+    ...(incomingStyle || {}),
+    ...(dateTimeNormalize || {}),
+  };
+
   return (
     <input
       type={type}
@@ -13,7 +36,8 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className,
       )}
-      {...props}
+      style={mergedStyle}
+      {...rest}
     />
   );
 }
