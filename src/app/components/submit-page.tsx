@@ -342,7 +342,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                   </Select>
                   <div className="space-y-2">
                     <Label htmlFor="date">Date *</Label>
-                    <Input
+                    <input
                       id="date"
                       type="date"
                       value={form.date}
@@ -378,7 +378,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
 
                 <div className="space-y-2">
                   <Label htmlFor="start_time">Start Time *</Label>
-                  <Input
+                  <input
                     id="start_time"
                     type="time"
                     step={900}
