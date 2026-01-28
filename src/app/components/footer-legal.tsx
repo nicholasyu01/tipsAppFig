@@ -33,7 +33,7 @@ export default function FooterLegal() {
           <Button
             variant="ghost"
             onClick={async () => {
-              const url = "https://cashouttips.ca";
+              const url = "https://www.cashouttips.ca";
               const message = `Ever wonder what servers/bartender actually make? ${url}`;
               const msg = `I’ve been using CashOut to track my tips and see what people actually make in hospitality 👀 Check it out: ${url}`;
               const msg1 = `Hey! Checkout CashOut — track your tips and see real hospitality earnings data. ${url}`;
