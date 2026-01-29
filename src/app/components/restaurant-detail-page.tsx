@@ -364,7 +364,7 @@ export function RestaurantDetailPage({
                         Average Tips Per Shift
                       </CardDescription>
                       <CardTitle className="text-2xl">
-                        ${stat.averageTips}/shift
+                        ${stat.averageTips.toFixed(2)}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
@@ -657,7 +657,7 @@ export function RestaurantDetailPage({
                                 <p className="text-sm">
                                   Avg Tips:{" "}
                                   <span className="font-medium">
-                                    ${data.avgTips}
+                                    ${data.avgTips.toFixed(2)}
                                   </span>
                                 </p>
                                 <p className="text-sm text-muted-foreground">

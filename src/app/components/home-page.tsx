@@ -1,6 +1,13 @@
 import { useState, useMemo, useEffect, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, TrendingUp, MapPin, Share, DollarSign } from "lucide-react";
+import {
+  Search,
+  TrendingUp,
+  MapPin,
+  Share,
+  DollarSign,
+  PlusCircle,
+} from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import {
   Card,
@@ -104,6 +111,15 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               />
             </div>
             <div className="mt-3 flex items-center justify-center gap-3">
+              {/* <Button
+                variant="outline"
+                onClick={async () => {
+                  navigate("/submit");
+                }}
+              >
+                <PlusCircle className="size-4" />
+                Submit Tips
+              </Button> */}
               <Button
                 variant="outline"
                 onClick={async () => {
