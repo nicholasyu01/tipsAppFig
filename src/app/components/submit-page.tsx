@@ -144,7 +144,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       tip_amount: Number(form.tip_amount),
       role: form.role,
       date: form.date,
-      start_time: "00:00", // form.start_time
+      start_time: form.start_time,
       tip_structure: form.tip_structure,
       created_at: new Date().toISOString(),
       shifts: Number(form.shifts),
