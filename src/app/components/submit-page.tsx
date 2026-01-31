@@ -35,7 +35,7 @@ import {
 } from "@/data/mockData";
 import { supabase } from "../lib/supabaseClient";
 import PlacesAutocomplete from "./placesAutoComplete";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "./ui/utils";
 
 interface SubmitPageProps {
@@ -59,6 +59,7 @@ interface ShiftFormData {
 export function SubmitPage({ onBack }: SubmitPageProps) {
   const { user } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState<
     "basic" | "earnings" | "review" | "success"
   >("basic");
@@ -79,6 +80,18 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     shifts: 1,
     hours: 8,
   });
+
+  // Prefill restaurant fields when navigated here with state from RestaurantDetailPage
+  useEffect(() => {
+    const state = (location.state as any) ?? {};
+    if (state?.restaurant) {
+      setForm((s) => ({
+        ...s,
+        restaurant: state.restaurant || s.restaurant,
+        address: state.address || s.address,
+      }));
+    }
+  }, [location.state]);
 
   const grossTips = Number(form.tip_amount) || Number(formData.grossTips) || 0;
   const tipOutAmount = Number(formData.tipOutAmount) || 0;

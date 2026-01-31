@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "@/app/lib/userContext";
 
 export default function ProtectedRoute({
@@ -8,6 +8,7 @@ export default function ProtectedRoute({
   children: React.ReactElement;
 }) {
   const { user, initializing } = useUser();
+  const location = useLocation();
 
   if (initializing) {
     // while we don't know auth status, render nothing (or a loader)
@@ -15,7 +16,7 @@ export default function ProtectedRoute({
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" replace state={{ from: location }} />;
   }
 
   return children;
