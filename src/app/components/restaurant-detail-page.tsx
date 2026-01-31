@@ -7,8 +7,10 @@ import {
   Clock,
   AlertCircle,
   MapPin,
+  PlusCircle,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -65,6 +67,7 @@ export function RestaurantDetailPage({
   restaurantAddress,
   onBack,
 }: RestaurantDetailPageProps) {
+  const navigate = useNavigate();
   // const allStats = getStatsForRestaurant(restaurantId);
 
   const [selectedRole, setSelectedRole] = useState<Role | "all">("all");
@@ -245,10 +248,26 @@ export function RestaurantDetailPage({
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-6">
-          <Button onClick={onBack} variant="ghost" className="mb-4">
-            <ArrowLeft className="size-4 mr-2" />
-            Back to Browse
-          </Button>
+          <div className="flex items-start justify-between mb-4">
+            <Button onClick={onBack} variant="ghost" className="mb-4">
+              <ArrowLeft className="size-4 mr-2" />
+              Back to Browse
+            </Button>
+            <Button
+              variant="default"
+              onClick={() =>
+                navigate("/submit", {
+                  state: {
+                    restaurant: restaurant.restaurant,
+                    address: restaurant.address,
+                  },
+                })
+              }
+            >
+              <PlusCircle className="size-4" />
+              Submit Tips
+            </Button>
+          </div>
 
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -262,9 +281,11 @@ export function RestaurantDetailPage({
                 </p>
               </div>
             </div>
-            {/* <Badge variant="secondary" className="text-lg px-4 py-2">
-              {restaurant.priceRange}
-            </Badge> */}
+            <div className="flex items-center gap-2">
+              {/* <Badge variant="secondary" className="text-lg px-4 py-2">
+                {restaurant.priceRange}
+              </Badge> */}
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">

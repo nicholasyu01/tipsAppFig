@@ -7,6 +7,7 @@ import {
   Share,
   DollarSign,
   PlusCircle,
+  ChevronRight,
 } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import {
@@ -91,10 +92,11 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl font-bold mb-4">
-              Real data from hospitality workers
+              Real tips data from real hospitality workers
             </h1>
             <p className="text-xl text-green-50 mb-8">
-              See actual tips earnings from industry professionals like you
+              Track your tips and see actual earnings from industry
+              professionals like you
             </p>
 
             {/* Search Bar */}
@@ -111,15 +113,15 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
               />
             </div>
             <div className="mt-3 flex items-center justify-center gap-3">
-              {/* <Button
-                variant="outline"
+              <Button
+                variant="default"
                 onClick={async () => {
                   navigate("/submit");
                 }}
               >
                 <PlusCircle className="size-4" />
                 Submit Tips
-              </Button> */}
+              </Button>
               <Button
                 variant="outline"
                 onClick={async () => {
@@ -254,7 +256,22 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                           : (restaurant.city ?? "")}
                       </CardDescription>
                     </div>
-                    {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
+                    <div className="flex items-center">
+                      <button
+                        aria-label="See more"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectRestaurant(
+                            restaurant.restaurant,
+                            restaurant.address,
+                          );
+                        }}
+                        className="p-2 rounded-md hover:bg-gray-100"
+                      >
+                        <ChevronRight className="size-5" />
+                      </button>
+                      {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap">

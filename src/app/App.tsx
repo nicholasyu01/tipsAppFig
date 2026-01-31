@@ -5,6 +5,7 @@ import {
   Route,
   useNavigate,
   useParams,
+  useLocation,
 } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { Header } from "@/app/components/header";
@@ -70,6 +71,7 @@ export default function App() {
 
 function InnerApp() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [pendingView, setPendingView] = useState<View | null>(null);
   const [userSubmissions, setUserSubmissions] =
     useState<ShiftSubmission[]>(mockShiftSubmissions);
@@ -106,7 +108,7 @@ function InnerApp() {
 
     if (protectedViews.includes(view) && !user) {
       setPendingView(view);
-      navigate("/auth");
+      navigate("/auth", { state: { from: viewToPath(view) } });
       return;
     }
 
@@ -119,7 +121,7 @@ function InnerApp() {
       const v = pendingView;
       setPendingView(null);
       if (protectedViews.includes(v) && !user) {
-        navigate("/auth");
+        navigate("/auth", { state: { from: viewToPath(v) } });
       } else {
         navigate(viewToPath(v));
       }
@@ -132,9 +134,9 @@ function InnerApp() {
   };
 
   const handleAuthSuccess = () => {
-    const nextView = pendingView ?? "home";
+    // Clear any pending view — `AuthPage` will read the redirect state and
+    // perform navigation back to the intended page. Avoid double navigation.
     setPendingView(null);
-    navigate(viewToPath(nextView));
   };
 
   const handleSignOut = async () => {
