@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Loader2, Mail, Lock, LogIn, UserPlus } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -35,8 +36,22 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // route helpers: use location.state.from to return user to intended page
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const fromState: any = (location && (location.state as any)?.from) || null;
+  const buildFromHref = () => {
+    if (!fromState) return "/";
+    if (typeof fromState === "string") return fromState;
+    const pathname = fromState?.pathname || "/";
+    const search = fromState?.search || "";
+    const hash = fromState?.hash || "";
+    return pathname + search + hash;
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -68,10 +83,47 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
       if (data.session) {
         setMessage("You are signed in.");
         onAuthSuccess?.();
+        try {
+          const to = buildFromHref();
+          navigate(to, { replace: true });
+        } catch (e) {
+          // fallback: go home
+          navigate("/", { replace: true });
+        }
       }
     }
 
     setIsLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setMessage(null);
+    setGoogleLoading(true);
+    try {
+      const intended = buildFromHref();
+      const redirectTo = window.location.origin + intended;
+      const { data, error: gError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+
+      if (gError) {
+        setError(gError.message || "Google sign-in failed");
+        return;
+      }
+
+      // Some Supabase setups return a redirect URL we should follow
+      if ((data as any)?.url) {
+        window.location.href = (data as any).url;
+      }
+      // Otherwise Supabase will redirect automatically
+    } catch (err: any) {
+      console.error("Google sign-in error:", err);
+      setError(err?.message ?? String(err));
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -281,6 +333,41 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>
           </form>
+          {/* <div className="mt-4 mb-2">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={handleGoogleSignIn}
+              disabled={isLoading || googleLoading}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                className="size-4"
+                width="18"
+                height="18"
+                aria-hidden
+              >
+                <path
+                  fill="#4285F4"
+                  d="M24 9.5c3.9 0 6.6 1.7 8.1 3.2l6-6C34.7 3 29.8 1 24 1 14.8 1 6.9 6.4 3 14.3l7.3 5.7C12.9 14.1 17.9 9.5 24 9.5z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M46.5 24c0-1.6-.1-2.9-.4-4.2H24v8h12.7c-.6 3.4-2.7 6.2-5.7 8.1l8 6.2C43.9 38 46.5 31.6 46.5 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M10.3 29.9c-.9-2.6-1.4-5.4-1.4-8.3s.5-5.7 1.4-8.3L3 7.6C.9 11.3 0 15.5 0 19.9s.9 8.6 3 12.3l7.3-2.3z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M24 46c5.9 0 10.9-2 14.6-5.5l-8-6.2C30.6 35.9 27.4 37 24 37c-6.1 0-11.1-4.6-13.7-10.8L3 34.3C6.9 42.2 14.8 46 24 46z"
+                />
+              </svg>
+              <span>Sign in with Google</span>
+            </Button>
+          </div> */}
         </CardContent>
 
         <CardFooter className="text-sm text-muted-foreground text-center justify-center">

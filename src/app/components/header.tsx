@@ -206,7 +206,7 @@ export function Header({
             className="flex items-center text-xl font-semibold hover:opacity-100 transition-opacity"
           >
             <img src="/cashout-logo2.png" alt="Ca$hOut" className="h-12 w-12" />
-            <img src="/cashout-logo3.png" alt="Ca$hOut" className="" />
+            <img src="/cashout-logo3.png" alt="Ca$hOut" className="h-10 w-29" />
 
             {/* <DollarSign className="size-6 text-green-600" /> */}
             {/* <span>Ca$hOut</span> */}
