@@ -73,6 +73,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <UserProvider>
+        <Analytics />
         <PageTracker />
         <InnerApp />
       </UserProvider>
@@ -170,7 +171,6 @@ function InnerApp() {
 
   return (
     <div className="h-full bg-gray-50">
-      <Analytics />
       <Header
         currentView={"home"}
         onNavigate={handleNavigate}
