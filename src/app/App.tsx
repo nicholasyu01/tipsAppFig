@@ -156,6 +156,7 @@ function InnerApp() {
 
   return (
     <div className="h-full bg-gray-50">
+      <Analytics />
       <Header
         currentView={"home"}
         onNavigate={handleNavigate}
@@ -217,7 +218,6 @@ function InnerApp() {
             </ProtectedRoute>
           }
         />
-        <Route path="/analytics" element={<Analytics />} />
       </Routes>
       <CookieBanner />
       <FooterLegal />
