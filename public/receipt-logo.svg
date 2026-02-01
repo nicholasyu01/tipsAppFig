@@ -1,0 +1,38 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .stroke {
+      fill: none;
+      stroke: #388e31;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+
+  <!-- Receipt outline -->
+  <path class="stroke" d="
+    M16 6
+    H48
+    V54
+    L44 50
+    L40 54
+    L36 50
+    L32 54
+    L28 50
+    L24 54
+    L20 50
+    L16 54
+    Z
+  "></path>
+
+  <!-- Dollar stem (vertically centered) -->
+  <path class="stroke" d="M32 18 V38"></path>
+
+  <!-- Dollar S (unchanged) -->
+  <path class="stroke" d="
+    M38 22
+    C38 19 26 19 26 24
+    C26 29 38 27 38 32
+    C38 37 26 37 26 34
+  "></path>
+</svg>

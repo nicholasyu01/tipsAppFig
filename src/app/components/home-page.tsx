@@ -266,9 +266,9 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                             restaurant.address,
                           );
                         }}
-                        className="p-2 rounded-md hover:bg-gray-100"
+                        className="rounded-md"
                       >
-                        <ChevronRight className="size-5" />
+                        <ChevronRight className="hover:cursor-pointer size-5" />
                       </button>
                       {/* <Badge variant="secondary">{restaurant.priceRange}</Badge> */}
                     </div>

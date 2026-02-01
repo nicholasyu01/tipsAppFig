@@ -203,10 +203,10 @@ export function Header({
         <div className="flex items-center justify-between">
           <button
             onClick={() => onNavigate("home")}
-            className="flex items-center text-xl font-semibold hover:opacity-100 transition-opacity"
+            className="hover:cursor-pointer flex items-center text-xl font-semibold hover:opacity-100 transition-opacity"
           >
-            <img src="/cashout-logo2.png" alt="Ca$hOut" className="h-12 w-12" />
-            <img src="/cashout-logo3.png" alt="Ca$hOut" className="h-10 w-29" />
+            <img src="/receipt-logo.svg" alt="Cashout" className="h-12 w-12" />
+            <img src="/cashout-logo3.png" alt="Cashout" className="h-10 w-33" />
 
             {/* <DollarSign className="size-6 text-green-600" /> */}
             {/* <span>Ca$hOut</span> */}
@@ -218,7 +218,7 @@ export function Header({
               <Button
                 variant={activeView === "home" ? "default" : "ghost"}
                 onClick={() => onNavigate("home")}
-                className="gap-2"
+                className="gap-2 hover:cursor-pointer"
               >
                 <Search className="size-4" />
                 <span className="hidden sm:inline">Browse</span>
@@ -236,7 +236,7 @@ export function Header({
               <Button
                 variant={activeView === "submit" ? "default" : "ghost"}
                 onClick={() => onNavigate("submit")}
-                className="gap-2"
+                className="gap-2 hover:cursor-pointer"
               >
                 <PlusCircle className="size-4" />
                 <span className="hidden sm:inline">Submit</span>
@@ -244,7 +244,7 @@ export function Header({
               <Button
                 variant={activeView === "my-submissions" ? "default" : "ghost"}
                 onClick={() => onNavigate("my-submissions")}
-                className="gap-2 relative"
+                className="gap-2 relative hover:cursor-pointer"
               >
                 <FileText className="size-4" />
                 <span className="hidden sm:inline">History</span>
@@ -261,7 +261,7 @@ export function Header({
                 {isAuthenticated ? (
                   <Button
                     variant={activeView === "auth" ? "default" : "ghost"}
-                    className="gap-2"
+                    className="gap-2 hover:cursor-pointer"
                     onClick={() => onSignOut()}
                   >
                     <LogOut className="size-4" />

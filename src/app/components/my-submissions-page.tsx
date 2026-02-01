@@ -387,7 +387,7 @@ export function MySubmissionsPage({
                       View and manage your shift earnings
                     </CardDescription> */}
                   </div>
-                  <Filter className="size-5 text-muted-foreground" />
+                  {/* <Filter className="size-5 text-muted-foreground" /> */}
                 </div>
               </CardHeader>
               <CardContent>
@@ -397,15 +397,21 @@ export function MySubmissionsPage({
                     <Select
                       value={filterRestaurant}
                       onValueChange={(v: string) => setFilterRestaurant(v)}
+                      className="hover:cursor-pointer"
                     >
                       <SelectTrigger className="w-[220px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Restaurants</SelectItem>
+                        <SelectItem
+                          className="capitalize hover:cursor-pointer"
+                          value="all"
+                        >
+                          All Restaurants
+                        </SelectItem>
                         {uniqueRestaurants.map((name) => (
                           <SelectItem
-                            className="capitalize"
+                            className="capitalize hover:cursor-pointer"
                             key={name}
                             value={name}
                           >
@@ -482,10 +488,7 @@ export function MySubmissionsPage({
                     const restaurant = getRestaurantById(submission.restaurant);
 
                     return (
-                      <Card
-                        key={submission.id}
-                        className="hover:shadow-md transition-shadow"
-                      >
+                      <Card key={submission.id} className="">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -502,7 +505,7 @@ export function MySubmissionsPage({
                                 {submission.address
                                   .split(",")
                                   .slice(0, 2)
-                                  .map((s) => s.trim())
+                                  .map((s: any) => s.trim())
                                   .join(", ")}
                               </p>
 
