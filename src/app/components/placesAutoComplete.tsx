@@ -6,10 +6,12 @@ type Place = Record<string, any>;
 
 interface PlacesAutocompleteProps {
   onSelect?: (place: Place) => void;
+  restaurant?: string | null;
 }
 
 export default function PlacesAutocomplete({
   onSelect,
+  restaurant = null,
 }: PlacesAutocompleteProps) {
   const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<Place[]>([]);
@@ -20,9 +22,15 @@ export default function PlacesAutocomplete({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (restaurant) {
+      setQuery(restaurant);
+    }
+  });
+
+  useEffect(() => {
     setSelected(null);
 
-    if (!query || query.trim().length < 2) {
+    if (!query || query.trim().length < 2 || restaurant) {
       setResults([]);
       setError(null);
       return;
