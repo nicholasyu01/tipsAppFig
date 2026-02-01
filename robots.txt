@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.cashouttips.ca/sitemap.xml
+# If you want to disallow crawling of staging/dev, set conditional rules in your deployment.
