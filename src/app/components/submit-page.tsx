@@ -93,6 +93,11 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
     }
   }, [location.state]);
 
+  function getRestaurantState() {
+    const state = (location.state as any) ?? {};
+    return state?.restaurant || null;
+  }
+
   const grossTips = Number(form.tip_amount) || Number(formData.grossTips) || 0;
   const tipOutAmount = Number(formData.tipOutAmount) || 0;
   const totalSales = Number(formData.totalSales) || 0;
@@ -302,6 +307,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                 <div className="space-y-2">
                   <Label htmlFor="restaurant">Restaurant *</Label>
                   <PlacesAutocomplete
+                    restaurant={getRestaurantState()}
                     onSelect={(place) => {
                       setForm((s) => ({
                         ...s,
@@ -367,6 +373,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
                         // Responsive overrides
                         "w-50/100 sm:w-full",
+                        "hover:cursor-pointer",
                       )}
                     />
                   </div>
@@ -410,6 +417,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
                       "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
                       // Responsive overrides
                       "w-50/100 sm:w-full",
+                      "hover:cursor-pointer",
                     )}
                   />
                 </div>

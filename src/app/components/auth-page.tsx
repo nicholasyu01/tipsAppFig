@@ -333,7 +333,7 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>
           </form>
-          {/* <div className="mt-4 mb-2">
+          <div className="mt-4 mb-2">
             <Button
               variant="outline"
               className="w-full flex items-center justify-center gap-2"
@@ -367,7 +367,7 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
               </svg>
               <span>Sign in with Google</span>
             </Button>
-          </div> */}
+          </div>
         </CardContent>
 
         <CardFooter className="text-sm text-muted-foreground text-center justify-center">
