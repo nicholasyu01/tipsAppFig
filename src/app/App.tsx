@@ -27,6 +27,7 @@ import { UserProvider, useUser } from "@/app/lib/userContext";
 import { MySubmissionsPage } from "./components/my-submissions-page";
 import { type ShiftSubmission, mockShiftSubmissions } from "@/data/mockData";
 import { Analytics } from "@vercel/analytics/react";
+import { initGA, trackPageView } from "./lib/ga";
 
 type View =
   | "home"
@@ -58,11 +59,22 @@ const viewToPath = (view: View) => {
   }
 };
 const protectedViews: View[] = ["submit", "my-submissions"];
+export function PageTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location]);
+
+  return null;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <UserProvider>
+        <Analytics />
+        <PageTracker />
         <InnerApp />
       </UserProvider>
     </BrowserRouter>
@@ -79,6 +91,9 @@ function InnerApp() {
   const [restaurantAddress, setRestaurantAddress] = useState<
     string | undefined
   >(undefined);
+  useEffect(() => {
+    initGA();
+  }, []);
 
   // Load submissions from localStorage on mount
   useEffect(() => {
@@ -217,7 +232,6 @@ function InnerApp() {
             </ProtectedRoute>
           }
         />
-        <Route path="/analytics" element={<Analytics />} />
       </Routes>
       <CookieBanner />
       <FooterLegal />
