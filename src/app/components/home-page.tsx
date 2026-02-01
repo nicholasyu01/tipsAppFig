@@ -154,6 +154,11 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
                 {copied ? "Copied to clipboard!" : " Share with friends"}
               </Button>
             </div>
+            {searchQuery == "67" && (
+              <div className="mt-6 flex items-center justify-center">
+                <img src="public/nub-nub-cat.gif" alt="Nub Nub the Cat" />
+              </div>
+            )}
           </div>
         </div>
       </div>
