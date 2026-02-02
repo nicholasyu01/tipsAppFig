@@ -55,6 +55,7 @@ export default function LeaveFeedbackPage({ onBack }: LeaveFeedbackPageProps) {
     setSubmitting(true);
     try {
       const payload = {
+        user_id: user?.id,
         email: email,
         comment: comment.trim(),
         created_at: new Date().toISOString(),

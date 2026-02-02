@@ -103,26 +103,11 @@ export function RestaurantDetailPage({
 
       try {
         const { data, error } = await supabase
-          .from("tips")
-          .select(
-            `
-          created_at,
-          date,
-          id,
-          restaurant,
-          address,
-          role,
-          start_time,
-          tip_amount,
-          tip_structure,
-          shifts,
-          hours
-        `,
-          )
+          .from("restaurant_tips")
+          .select("*")
           .eq("restaurant", restaurantId)
           .eq("address", restaurantAddress)
           .order("created_at", { ascending: false });
-
         if (error) {
           console.error("Error fetching restaurant tips:", error);
           setRestaurants([]);
