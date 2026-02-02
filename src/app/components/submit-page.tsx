@@ -156,6 +156,7 @@ export function SubmitPage({ onBack }: SubmitPageProps) {
       form.restaurant;
 
     const payload = {
+      user_id: user?.id,
       name: user?.email ?? null,
       restaurant: (restaurantName ?? "").trim(),
       address: form.address || "",
