@@ -94,11 +94,10 @@ export function HomePage({ onSelectRestaurant }: HomePageProps) {
             <h1 className="invisible">CashOut</h1>
 
             <h1 className="text-4xl font-bold mb-4">
-              Real tips data from real hospitality workers
+              Track your tips and see earnings from hospitality workers
             </h1>
             <p className="text-xl text-green-50 mb-8">
-              Track your tips and see actual earnings from industry
-              professionals like you
+              Real tips data from real industry professionals like you
             </p>
 
             {/* Search Bar */}
